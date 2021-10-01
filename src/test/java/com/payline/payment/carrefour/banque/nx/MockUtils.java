@@ -1,7 +1,8 @@
 package com.payline.payment.carrefour.banque.nx;
 
 
-import com.payline.payment.carrefour.banque.nx.bean.configuration.RequestConfiguration;
+import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
+import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.payment.carrefour.banque.nx.utils.TestUtils;
 import com.payline.pmapi.bean.common.Buyer;
@@ -44,9 +45,11 @@ public class MockUtils {
      * Generate a valid {@link ContractConfiguration}.
      */
     public static ContractConfiguration aContractConfiguration() {
-		    //TODO a completer avec les contracts configurations si existantes.
-	        final Map<String, ContractProperty> contractProperties = new HashMap<>();
-			return new ContractConfiguration("carrefour-banque-nx", contractProperties);
+        final Map<String, ContractProperty> contractProperties = new HashMap<>();
+        contractProperties.put(Constants.ContractConfigurationKeys.MERCHANT_ID, new ContractProperty("MERCHANT_ID"));
+        contractProperties.put(Constants.ContractConfigurationKeys.OFFER_ID, new ContractProperty("0"));
+        contractProperties.put(Constants.ContractConfigurationKeys.DURATION, new ContractProperty("1"));
+        return new ContractConfiguration("carrefour-banque-nx", contractProperties);
 	}
 	
 	 /**
@@ -72,8 +75,30 @@ public class MockUtils {
      * Generate a valid {@link Buyer}.
      */
     public static Buyer aBuyer() {
+        final Map<Buyer.AddressType, Buyer.Address> addresses = new HashMap<>();
+        addresses.put(Buyer.AddressType.BILLING, Buyer.Address.AddressBuilder.anAddress()
+                .withStreetNumber("1")
+                .withStreet1("billing1")
+                .withStreet2("billing2")
+                .withCity("billingCity")
+                .withZipCode("billingZipCode")
+                .withCountry("FR")
+                .build());
+        addresses.put(Buyer.AddressType.DELIVERY, Buyer.Address.AddressBuilder.anAddress()
+                .withStreetNumber("2")
+                .withStreet1("delivery1")
+                .withCity("deliveryCity")
+                .withZipCode("deliveryZipCode")
+                .withCountry("FR")
+                .build());
+        final Map<Buyer.PhoneNumberType, String> phoneNumbers = new HashMap<>();
+        phoneNumbers.put(Buyer.PhoneNumberType.CELLULAR, "0033601020304");
         return Buyer.BuyerBuilder.aBuyer()
+                .withCustomerIdentifier("id1")
                 .withFullName(new Buyer.FullName("Marie", "Durand", "1"))
+                .withPhoneNumbers(phoneNumbers)
+                .withAddresses(addresses)
+                .withEmail("test@mail.com")
                 .build();
     }
 
@@ -91,10 +116,25 @@ public class MockUtils {
      * Generate a valid, but not complete, {@link Order}
      */
     public static Order anOrder() {
+        final List<Order.OrderItem> items = new ArrayList<>();
+        items.add(Order.OrderItem.OrderItemBuilder.anOrderItem()
+                .withAmount(aPaylineAmount())
+                .withQuantity(2L)
+                .withReference("ref")
+                .withComment("comment?")
+                .build());
+        items.add(Order.OrderItem.OrderItemBuilder.anOrderItem()
+                .withAmount(aPaylineAmount())
+                .withQuantity(3L)
+                .withReference("ref2")
+                .withComment("comment2")
+                .build());
         return Order.OrderBuilder.anOrder()
                 .withDate(new Date())
                 .withAmount(aPaylineAmount())
                 .withReference("REF" + timestamp)
+                .withDeliveryMode("1")
+                .withItems(items)
                 .build();
     }
 
@@ -108,6 +148,7 @@ public class MockUtils {
                 .withCountry("FR")
                 .withEmail("john.doe@mythalesgroup.io")
                 .withFullName(new Buyer.FullName("Jon", "Doe", "M."))
+                .withStreetNumber("1")
                 .withStreet1("150 rue dont le nom est le plus long que j'ai jamais vu. Y'a pas idée d'habiter un endroit pareil !")
                 .withStreet2("Le grand bâtiment orange, avec les fenêtres un peu hautes mais un peu larges aussi, et un toit bleu")
                 .withZipCode("13100")
@@ -134,20 +175,20 @@ public class MockUtils {
      */
     public static PaymentRequest.Builder aPaylinePaymentRequestBuilder() {
         return PaymentRequest.builder()
-                .withAmount( aPaylineAmount() )
-                .withBrowser( aBrowser() )
-                .withBuyer( aBuyer() )
-                .withCaptureNow( true )
-                .withContractConfiguration( aContractConfiguration() )
-                .withDifferedActionDate( TestUtils.addTime( new Date(), Calendar.DATE, 5) )
-                .withEnvironment( anEnvironment() )
-                .withLocale( Locale.getDefault() )
-                .withOrder( anOrder() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withPaymentFormContext( aPaymentFormContext() )
-                .withPluginConfiguration( aPluginConfiguration() )
-                .withSoftDescriptor( "softDescriptor" )
-                .withTransactionId( "PAYLINE" + timestamp );
+                .withAmount(aPaylineAmount())
+                .withBrowser(aBrowser())
+                .withBuyer(aBuyer())
+                .withCaptureNow(true)
+                .withContractConfiguration(aContractConfiguration())
+                .withDifferedActionDate(TestUtils.addTime(new Date(), Calendar.DATE, 5))
+                .withEnvironment(anEnvironment())
+                .withLocale(Locale.getDefault())
+                .withOrder(anOrder())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withPaymentFormContext(aPaymentFormContext())
+                .withPluginConfiguration(aPluginConfiguration())
+                .withSoftDescriptor("softDescriptor")
+                .withTransactionId("PAYLINE" + timestamp);
     }
 
     /**
@@ -178,14 +219,14 @@ public class MockUtils {
      */
     public static PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder aPaymentFormConfigurationRequestBuilder() {
         return PaymentFormConfigurationRequest.PaymentFormConfigurationRequestBuilder.aPaymentFormConfigurationRequest()
-                .withAmount( aPaylineAmount() )
-                .withBuyer( aBuyer() )
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withLocale( Locale.getDefault() )
-                .withOrder( anOrder() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withPluginConfiguration( aPluginConfiguration() );
+                .withAmount(aPaylineAmount())
+                .withBuyer(aBuyer())
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withLocale(Locale.getDefault())
+                .withOrder(anOrder())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withPluginConfiguration(aPluginConfiguration());
     }
 
     /**
@@ -193,10 +234,10 @@ public class MockUtils {
      */
     public static PaymentFormLogoRequest aPaymentFormLogoRequest() {
         return PaymentFormLogoRequest.PaymentFormLogoRequestBuilder.aPaymentFormLogoRequest()
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withLocale( Locale.getDefault() )
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withLocale(Locale.getDefault())
                 .build();
     }
 
@@ -213,37 +254,37 @@ public class MockUtils {
      */
     public static RedirectionPaymentRequest aRedirectionPaymentRequest() {
         return RedirectionPaymentRequest.builder()
-                .withAmount( aPaylineAmount() )
-                .withBrowser( aBrowser() )
-                .withBuyer( aBuyer() )
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withOrder( anOrder() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withTransactionId( aTransactionId() )
+                .withAmount(aPaylineAmount())
+                .withBrowser(aBrowser())
+                .withBuyer(aBuyer())
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withOrder(anOrder())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withTransactionId(aTransactionId())
                 .build();
     }
 
-    /**
-     * Generate a valid {@link RequestConfiguration}.
-     */
-    public static RequestConfiguration aRequestConfiguration(){
-        return new RequestConfiguration( aContractConfiguration(), anEnvironment(), aPartnerConfiguration() );
-    }
-	
 	 /**
      * Generate a valid {@link PartnerConfiguration}.
      */
     public static PartnerConfiguration aPartnerConfiguration() {
         Map<String, String> partnerConfigurationMap = new HashMap<>();
-        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CIRCEO_SCRIPT_URL, "url.com");
-        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CLIENT_ID, "clientId");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CIRCEO_SCRIPT_URL,
+                "https://iam.ibmeu02.circeo.today/auth/realms/car-fr-uat/protocol/openid-connect/token");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CIRCEO_API_URL,
+                "https://recette.theloanfactory.carrefour-banque.fr/integration/service");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.CLIENT_ID, "FILL_ME_FOR_TEST_IT");  // ne pas commiter !!!!
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.OFFER_OPTIONS_AVAILABLE, "0:tbc1,1:tbc2,2:tbc3");
         partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.DURATION_OPTIONS_AVAILABLE, "0:3,1:4");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.HTTP_CONNECTION_REQUEST_TIMEOUT, "1");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.HTTP_CONNECT_TIMEOUT, "2");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.HTTP_SOCKET_TIMEOUT, "3");
+        partnerConfigurationMap.put(Constants.PartnerConfigurationKeys.HTTP_RETRIES, "4");
 
         Map<String, String> sensitiveConfigurationMap = new HashMap<>();
         sensitiveConfigurationMap.put(Constants.PartnerConfigurationKeys.PRIVATE_KEY, "privateKey");
-        sensitiveConfigurationMap.put(Constants.PartnerConfigurationKeys.CLIENT_SECRET, "clientSecret");
+        sensitiveConfigurationMap.put(Constants.PartnerConfigurationKeys.CLIENT_SECRET, "FILL_ME_FOR_TEST_IT");  // ne pas commiter !!!!
 
         return new PartnerConfiguration(partnerConfigurationMap, sensitiveConfigurationMap);
     }
@@ -255,10 +296,10 @@ public class MockUtils {
      */
     public static RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder aRetrievePluginConfigurationRequestBuilder() {
         return RetrievePluginConfigurationRequest.RetrieveConfigurationRequestBuilder.aRetrieveConfigurationRequest()
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withPluginConfiguration( aPluginConfiguration() );
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withPluginConfiguration(aPluginConfiguration() );
     }
 
     /**
@@ -273,13 +314,25 @@ public class MockUtils {
      */
     public static TransactionStatusRequest aTransactionStatusRequest() {
         return TransactionStatusRequest.TransactionStatusRequestBuilder.aNotificationRequest()
-                .withAmount( aPaylineAmount() )
-                .withBuyer( aBuyer() )
-                .withContractConfiguration( aContractConfiguration() )
-                .withEnvironment( anEnvironment() )
-                .withOrder( anOrder() )
-                .withPartnerConfiguration( aPartnerConfiguration() )
-                .withTransactionId( aTransactionId() )
+                .withAmount(aPaylineAmount() )
+                .withBuyer(aBuyer() )
+                .withContractConfiguration(aContractConfiguration() )
+                .withEnvironment(anEnvironment() )
+                .withOrder(anOrder() )
+                .withPartnerConfiguration(aPartnerConfiguration() )
+                .withTransactionId(aTransactionId() )
+                .build();
+    }
+
+    public static FinancingRequest aFinancingRequest() {
+        return FinancingRequest.builder()
+                .build();
+    }
+
+    public static FinancingRequestResponse aFinancingRequestResponse() {
+        return FinancingRequestResponse.builder()
+                .financingId("financingId")
+                .redirectionUrl("http://url.com")
                 .build();
     }
 

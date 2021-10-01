@@ -1,0 +1,12 @@
+{
+  "header": {
+    "merchantId": "310001",
+    "messageId": "e77c172f-5b36-404c-9205-b9b633dfdee2",
+    "creationDateTime": "2021-08-24T14:15:22Z",
+    "callbackUrl": "https://myserver.com/notifyMeHEre"
+  },
+  "request": {
+    "misc": {},
+    "deliveryState": "DELIVERED"
+  }
+}
