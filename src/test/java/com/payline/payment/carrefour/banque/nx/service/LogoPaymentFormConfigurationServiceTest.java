@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 class LogoPaymentFormConfigurationServiceTest {
 
@@ -39,8 +40,8 @@ class LogoPaymentFormConfigurationServiceTest {
 
     @Mock
     private I18nService i18n;
-    @Mock
-    private ConfigProperties config;
+
+    private ConfigProperties config = spy(ConfigProperties.getInstance());
 
     private final Locale locale = Locale.getDefault();
 
@@ -54,8 +55,6 @@ class LogoPaymentFormConfigurationServiceTest {
     void getPaymentFormLogo_nominal() {
         // given: the configuration is correct
         PaymentFormLogoRequest paymentFormLogoRequest = MockUtils.aPaymentFormLogoRequest();
-        doReturn("64").when(config).get("logo.height");
-        doReturn("64").when(config).get("logo.width");
         doReturn("carrefour-banque-nxWorldline").when(i18n).getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale());
 
         // when: calling method getPaymentFormLogo()
@@ -63,8 +62,8 @@ class LogoPaymentFormConfigurationServiceTest {
 
         // then:
         assertTrue(logoResponse instanceof PaymentFormLogoResponseFile);
-        assertEquals(64, ((PaymentFormLogoResponseFile) logoResponse).getHeight());
-        assertEquals(64, ((PaymentFormLogoResponseFile) logoResponse).getWidth());
+        assertEquals(Integer.valueOf(config.get("logo.height")), ((PaymentFormLogoResponseFile) logoResponse).getHeight());
+        assertEquals(Integer.valueOf(config.get("logo.width")), ((PaymentFormLogoResponseFile) logoResponse).getWidth());
         assertTrue(((PaymentFormLogoResponseFile) logoResponse).getTitle().contains("carrefour-banque-nxWorldline"));
         assertTrue(((PaymentFormLogoResponseFile) logoResponse).getAlt().contains("carrefour-banque-nxWorldline"));
     }
@@ -74,7 +73,6 @@ class LogoPaymentFormConfigurationServiceTest {
         // given: the logo.height config value is incorrect (not an integer)
         PaymentFormLogoRequest paymentFormLogoRequest = MockUtils.aPaymentFormLogoRequest();
         doReturn("abc").when(config).get("logo.height");
-        doReturn("64").when(config).get("logo.width");
         doReturn("carrefour-banque-nxWorldline").when(i18n)
                 .getMessage("paymentMethod.name", paymentFormLogoRequest.getLocale());
 
@@ -86,7 +84,6 @@ class LogoPaymentFormConfigurationServiceTest {
     void getPaymentFormLogo_wrongWidth() {
         // given: the logo.height config value is incorrect (not an integer)
         PaymentFormLogoRequest paymentFormLogoRequest = MockUtils.aPaymentFormLogoRequest();
-        doReturn("64").when(config).get("logo.height");
         doReturn("abc").when(config).get("logo.width");
         doReturn("carrefour-banque-nxWorldline").when(i18n).getMessage("paymentMethod.name",
                 paymentFormLogoRequest.getLocale());
@@ -102,26 +99,18 @@ class LogoPaymentFormConfigurationServiceTest {
 
     @Test
     void getLogo_nominal() {
-        // given: a valid configuration
-        doReturn("test_logo.png").when(config).get("logo.filename");
-        doReturn("png").when(config).get("logo.format");
-        doReturn("image/png").when(config).get("logo.contentType");
-
         // when: calling method getLogo()
         PaymentFormLogo paymentFormLogo = testService.getLogo("whatever", locale);
 
         // then:
         assertNotNull(paymentFormLogo.getContentType());
         assertNotNull(paymentFormLogo.getFile());
-    }
+     }
 
     @Test
     void getLogo_wrongFilename() {
         // given: a valid configuration
         doReturn("does_not_exist.png").when(config).get("logo.filename");
-        doReturn("png").when(config).get("logo.format");
-        doReturn("image/png").when(config).get("logo.contentType");
-
         // when: calling method getLogo(), then: an exception is thrown
         try {
             testService.getLogo("whatever", locale);
@@ -133,10 +122,6 @@ class LogoPaymentFormConfigurationServiceTest {
 
     @Test
     void getWalletLogoNominal() {
-        // given: a valid configuration
-        doReturn("test_logo.png").when(config).get("logoWallet.filename");
-        doReturn("png").when(config).get("logoWallet.format");
-        doReturn("image/png").when(config).get("logoWallet.contentType");
 
         //Call wallet logo service.
         PaymentFormLogo paymentFormLogo = testService.getWalletLogo("carrefour-banque-nx", Locale.getDefault());
@@ -148,11 +133,7 @@ class LogoPaymentFormConfigurationServiceTest {
 
     @Test
     void getWalletLogoWithWrongConfiguration() {
-        // given: a invalid configuration
         doReturn("does_not_exist.png").when(config).get("logoWallet.filename");
-        doReturn("png").when(config).get("logoWallet.format");
-        doReturn("image/png").when(config).get("logoWallet.contentType");
-
         // check
         try {
             testService.getWalletLogo("carrefour-banque-nx", locale);
