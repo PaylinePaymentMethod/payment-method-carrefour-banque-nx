@@ -54,7 +54,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 .build();
         // check required fields
         for (final AbstractParameter param : this.getParameters(contractParametersRequest)) {
-            if (param.isRequired() && accountInfo.get(param.getKey()) == null) {
+            if (param.isRequired() && PluginUtils.isEmpty(accountInfo.get(param.getKey()))) {
                 final String message = i18n.getMessage(I18N_CONTRACT_PREFIX + param.getKey() + ".requiredError", locale);
                 errors.put(param.getKey(), message);
             }
