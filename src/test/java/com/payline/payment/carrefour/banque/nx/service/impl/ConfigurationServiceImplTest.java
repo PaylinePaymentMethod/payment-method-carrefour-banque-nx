@@ -11,7 +11,9 @@ import com.payline.pmapi.bean.configuration.parameter.impl.InputParameter;
 import com.payline.pmapi.bean.configuration.parameter.impl.ListBoxParameter;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.configuration.request.ContractParametersRequest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,7 +27,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
 class ConfigurationServiceImplTest {
@@ -162,10 +164,12 @@ class ConfigurationServiceImplTest {
 
         @Test
         void requiredFields() {
+            final Map<String, String> accountInfo = new HashMap<>();
+            accountInfo.put(Constants.ContractConfigurationKeys.MERCHANT_ID, "");
             final ContractParametersCheckRequest request = ContractParametersCheckRequest.CheckRequestBuilder.aCheckRequest()
                     .withPartnerConfiguration(partnerConfiguration)
                     .withLocale(Locale.FRENCH)
-                    .withAccountInfo(new HashMap<>())
+                    .withAccountInfo(accountInfo)
                     .withContractConfiguration(MockUtils.aContractConfiguration())
                     .withEnvironment(MockUtils.anEnvironment())
                     .build();
