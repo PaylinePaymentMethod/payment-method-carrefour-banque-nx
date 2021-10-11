@@ -16,29 +16,29 @@ public class PluginException extends RuntimeException {
     private final String errorCode;
     private final FailureCause failureCause;
 
-    public PluginException( String message ){
-        this( message, FailureCause.INTERNAL_ERROR );
+    public PluginException(final String message) {
+        this(message, FailureCause.INTERNAL_ERROR);
     }
 
-    public PluginException( String message, FailureCause failureCause ){
+    public PluginException(final String message, final FailureCause failureCause) {
         super(message);
-        if( message == null || message.length() == 0 || failureCause == null ){
+        if (message == null || message.length() == 0 || failureCause == null) {
             throw new IllegalStateException("PluginException must have a non-empty message and a failureCause");
         }
-        this.errorCode = PluginUtils.truncate( message, ERROR_CODE_MAX_LENGTH );
+        this.errorCode = PluginUtils.truncate(message, ERROR_CODE_MAX_LENGTH);
         this.failureCause = failureCause;
     }
 
-    public PluginException( String message, Exception cause ){
-        this( message, FailureCause.INTERNAL_ERROR, cause );
+    public PluginException(final String message, final Exception cause) {
+        this(message, FailureCause.INTERNAL_ERROR, cause);
     }
 
-    public PluginException( String message, FailureCause failureCause, Exception cause ){
+    public PluginException(final String message, final FailureCause failureCause, final Exception cause) {
         super(message, cause);
-        if( message == null || message.length() == 0 || failureCause == null ){
+        if (message == null || message.length() == 0 || failureCause == null) {
             throw new IllegalStateException("PluginException must have a non-empty message and a failureCause");
         }
-        this.errorCode = PluginUtils.truncate( message, ERROR_CODE_MAX_LENGTH );
+        this.errorCode = PluginUtils.truncate(message, ERROR_CODE_MAX_LENGTH);
         this.failureCause = failureCause;
     }
 
@@ -56,10 +56,10 @@ public class PluginException extends RuntimeException {
      * with other fields than 'failureCause' or 'errorCode', such as 'partnerTransactionId' for example.
      * @return A pre-configured builder
      */
-    public PaymentResponseFailure.PaymentResponseFailureBuilder toPaymentResponseFailureBuilder(){
+    public PaymentResponseFailure.PaymentResponseFailureBuilder toPaymentResponseFailureBuilder() {
         return PaymentResponseFailure.PaymentResponseFailureBuilder.aPaymentResponseFailure()
-                .withFailureCause( failureCause )
-                .withErrorCode( errorCode );
+                .withFailureCause(failureCause)
+                .withErrorCode(errorCode);
     }
 
     /**
@@ -70,8 +70,8 @@ public class PluginException extends RuntimeException {
      */
     public PaymentFormConfigurationResponseFailure.PaymentFormConfigurationResponseFailureBuilder toPaymentFormConfigurationResponseFailureBuilder() {
         return PaymentFormConfigurationResponseFailure.PaymentFormConfigurationResponseFailureBuilder.aPaymentFormConfigurationResponseFailure()
-                .withFailureCause( failureCause )
-                .withErrorCode( errorCode );
+                .withFailureCause(failureCause)
+                .withErrorCode(errorCode);
     }
 
     /**
@@ -82,8 +82,8 @@ public class PluginException extends RuntimeException {
      */
     public RefundResponseFailure.RefundResponseFailureBuilder toRefundResponseFailureBuilder() {
         return RefundResponseFailure.RefundResponseFailureBuilder.aRefundResponseFailure()
-                .withFailureCause( failureCause )
-                .withErrorCode( errorCode );
+                .withFailureCause(failureCause)
+                .withErrorCode(errorCode);
     }
 
     /**
@@ -91,9 +91,9 @@ public class PluginException extends RuntimeException {
      * @param e The exception
      * @return A truncated errorCode to insert into any FailureResponse object.
      */
-    public static String runtimeErrorCode( RuntimeException e ){
-        String errorCode = "plugin error: " + e.toString().substring(e.toString().lastIndexOf('.') + 1);
-        return PluginUtils.truncate( errorCode, ERROR_CODE_MAX_LENGTH );
+    public static String runtimeErrorCode(final RuntimeException e) {
+        final String errorCode = "plugin error: " + e.toString().substring(e.toString().lastIndexOf('.') + 1);
+        return PluginUtils.truncate(errorCode, ERROR_CODE_MAX_LENGTH);
     }
 
 }

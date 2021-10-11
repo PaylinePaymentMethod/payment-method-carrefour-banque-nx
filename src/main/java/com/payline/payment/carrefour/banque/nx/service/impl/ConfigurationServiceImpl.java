@@ -1,10 +1,9 @@
 package com.payline.payment.carrefour.banque.nx.service.impl;
 
+import com.payline.payment.carrefour.banque.nx.service.PartnerConfigurationService;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
-import com.payline.payment.carrefour.banque.nx.utils.PluginUtils;
 import com.payline.payment.carrefour.banque.nx.utils.i18n.I18nService;
 import com.payline.payment.carrefour.banque.nx.utils.properties.ReleaseProperties;
-import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
 import com.payline.pmapi.bean.configuration.parameter.AbstractParameter;
 import com.payline.pmapi.bean.configuration.parameter.impl.InputParameter;
@@ -23,6 +22,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     private I18nService i18n = I18nService.getInstance();
     private ReleaseProperties releaseProperties = ReleaseProperties.getInstance();
+    private PartnerConfigurationService partnerConfigurationService = PartnerConfigurationService.getInstance();
 
 
     @Override
@@ -32,8 +32,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @Override
     public List<AbstractParameter> getParameters(ContractParametersRequest request) {
-        final Map<String, String> offerOptions = fetchOptionsFromPartnerConf(Constants.PartnerConfigurationKeys.OFFER_OPTIONS_AVAILABLE, request.getPartnerConfiguration());
-        final Map<String, String> durationOptions = fetchOptionsFromPartnerConf(Constants.PartnerConfigurationKeys.DURATION_OPTIONS_AVAILABLE, request.getPartnerConfiguration());
+        final Map<String, String> offerOptions = partnerConfigurationService.fetchOptionsFromPartnerConf(
+                Constants.PartnerConfigurationKeys.OFFER_OPTIONS_AVAILABLE, request.getPartnerConfiguration());
+        final Map<String, String> durationOptions = partnerConfigurationService.fetchOptionsFromPartnerConf(
+                Constants.PartnerConfigurationKeys.DURATION_OPTIONS_AVAILABLE, request.getPartnerConfiguration());
 
         final Locale locale = request.getLocale();
         final List<AbstractParameter> parameters = new ArrayList<>();
@@ -110,31 +112,4 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         listBoxParameter.setRequired(required);
         return listBoxParameter;
     }
-
-    /**
-     * Methode permettant d'extraire les options des partners configurations
-     * @param key
-     *      La clé des partners configurations contenant les options
-     * @param partnerConfiguration
-     *      Les partners configurations.
-     * @return
-     *      La liste des options possibles pour le paramètre du contrat.
-     */
-    protected Map<String, String> fetchOptionsFromPartnerConf(final String key, final PartnerConfiguration partnerConfiguration) {
-        final Map<String, String> optionsMap = new HashMap<>();
-        final String options = partnerConfiguration.getProperty(key);
-        if (!PluginUtils.isEmpty(options)) {
-            final List <String> optionsList = Arrays.asList(options.split(","));
-            optionsList.forEach(e -> {
-                final String[] option = e.split(":");
-                if (option.length == 2) {
-                    optionsMap.put(option[0], option[1]);
-                }
-            });
-        }
-        return optionsMap;
-    }
-
 }
-
-
