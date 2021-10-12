@@ -2,6 +2,7 @@ package com.payline.payment.carrefour.banque.nx.service.impl;
 
 import com.payline.payment.carrefour.banque.nx.service.PartnerConfigurationService;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
+import com.payline.payment.carrefour.banque.nx.utils.PluginUtils;
 import com.payline.payment.carrefour.banque.nx.utils.i18n.I18nService;
 import com.payline.payment.carrefour.banque.nx.utils.properties.ReleaseProperties;
 import com.payline.pmapi.bean.configuration.ReleaseInformation;
