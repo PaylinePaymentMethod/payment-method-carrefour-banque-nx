@@ -15,6 +15,8 @@ import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,10 +59,11 @@ class NotificationServiceImplTest {
             assertEquals(financingRequestStatus.getFinancingId(), transactionCorrelationId.getValue());
         }
 
-        @Test
-        void shouldIgnoreIfStatusIsStarted() throws JsonProcessingException {
+        @ParameterizedTest
+        @EnumSource(value = State.class, names = {"STARTED", "ACCEPTED"})
+        void shouldIgnoreStatus(final State ignoredState) throws JsonProcessingException {
             final NotificationRequest notificationRequest = MockUtils.aPaylineNotificationRequest("body");
-            final FinancingRequestStatus financingRequestStatus = MockUtils.aFinancingRequestStatus().toBuilder().state(State.STARTED).build();
+            final FinancingRequestStatus financingRequestStatus = MockUtils.aFinancingRequestStatus().toBuilder().state(ignoredState).build();
 
             doReturn(financingRequestStatus).when(objectMapper).readValue("body", FinancingRequestStatus.class);
 
