@@ -2,19 +2,26 @@ package com.payline.payment.carrefour.banque.nx;
 
 
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
+import com.payline.payment.carrefour.banque.nx.bean.request.State;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
+import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.payment.carrefour.banque.nx.utils.TestUtils;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
 import com.payline.pmapi.bean.configuration.request.RetrievePluginConfigurationRequest;
+import com.payline.pmapi.bean.notification.request.NotificationRequest;
 import com.payline.pmapi.bean.payment.*;
 import com.payline.pmapi.bean.payment.request.PaymentRequest;
 import com.payline.pmapi.bean.payment.request.RedirectionPaymentRequest;
 import com.payline.pmapi.bean.payment.request.TransactionStatusRequest;
+import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.EmptyTransactionDetails;
+import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormConfigurationRequest;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormLogoRequest;
+
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -262,10 +269,27 @@ public class MockUtils {
                 .withOrder(anOrder())
                 .withPartnerConfiguration(aPartnerConfiguration())
                 .withTransactionId(aTransactionId())
+                .withRequestContext(aRequestContext())
                 .build();
     }
 
-	 /**
+    private static RequestContext aRequestContext() {
+        final Map<String, String> requestData = new HashMap<>();
+        requestData.put(Constants.RequestContextKeys.FINANCING_ID, "financingId");
+        return RequestContext.RequestContextBuilder.aRequestContext()
+                .withRequestData(requestData)
+                .build();
+    }
+
+    public static PaymentResponseSuccess aPaymentResponseSuccess() {
+        return PaymentResponseSuccess.PaymentResponseSuccessBuilder.aPaymentResponseSuccess()
+                .withTransactionDetails(new EmptyTransactionDetails())
+                .withPartnerTransactionId("financingId")
+                .withStatusCode("OK")
+                .build();
+    }
+
+    /**
      * Generate a valid {@link PartnerConfiguration}.
      */
     public static PartnerConfiguration aPartnerConfiguration() {
@@ -306,7 +330,20 @@ public class MockUtils {
      * @return a valid transaction ID.
      */
     public static String aTransactionId() {
-        return "123456789012345678901";
+        return "financingId";
+    }
+
+    public static NotificationRequest aPaylineNotificationRequest(final String body) {
+        return NotificationRequest.NotificationRequestBuilder
+                .aNotificationRequest()
+                .withContent(new ByteArrayInputStream(body.getBytes()))
+                .withContractConfiguration(aContractConfiguration())
+                .withHttpMethod("GET")
+                .withPathInfo("foo")
+                .withEnvironment(anEnvironment())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withHeaderInfos(new HashMap<>())
+                .build();
     }
 
     /**
@@ -321,6 +358,7 @@ public class MockUtils {
                 .withOrder(anOrder() )
                 .withPartnerConfiguration(aPartnerConfiguration() )
                 .withTransactionId(aTransactionId() )
+                .withNeedFinalStatus(false)
                 .build();
     }
 
@@ -333,6 +371,13 @@ public class MockUtils {
         return FinancingRequestResponse.builder()
                 .financingId("financingId")
                 .redirectionUrl("http://url.com")
+                .build();
+    }
+
+    public static FinancingRequestStatus aFinancingRequestStatus() {
+        return FinancingRequestStatus.builder()
+                .financingId("financingId")
+                .state(State.FINANCED)
                 .build();
     }
 
