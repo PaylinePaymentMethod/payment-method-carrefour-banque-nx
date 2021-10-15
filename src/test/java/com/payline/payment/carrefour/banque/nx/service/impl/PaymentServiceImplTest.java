@@ -82,7 +82,7 @@ class PaymentServiceImplTest {
             assertNotNull(paymentResponse);
             assertTrue(paymentResponse instanceof PaymentResponseFailure);
             final PaymentResponseFailure paymentResponseFailure = (PaymentResponseFailure) paymentResponse;
-            assertEquals(FailureCause.COMMUNICATION_ERROR, paymentResponseFailure.getFailureCause());
+            assertEquals(FailureCause.INVALID_DATA, paymentResponseFailure.getFailureCause());
             assertEquals("server error", paymentResponseFailure.getErrorCode());
         }
         @Test

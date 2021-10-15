@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 public class PluginUtils {
+
 
     private PluginUtils() {
     }
@@ -48,4 +51,14 @@ public class PluginUtils {
         final BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         return br.lines().collect(Collectors.joining(System.lineSeparator()));
     }
+
+    /**
+     * Create date Time Object
+     * @return String date time format
+     */
+    public static String dateTimeNow() {
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_TIME_FORMAT);
+        return simpleDateFormat.format(new Date());
+    }
+
 }

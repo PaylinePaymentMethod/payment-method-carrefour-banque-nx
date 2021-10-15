@@ -2,7 +2,10 @@ package com.payline.payment.carrefour.banque.nx;
 
 
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
+import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
 import com.payline.payment.carrefour.banque.nx.bean.request.State;
+import com.payline.payment.carrefour.banque.nx.bean.response.CancelationRequestState;
+import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
@@ -20,6 +23,7 @@ import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.Empty
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormConfigurationRequest;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormLogoRequest;
+import com.payline.pmapi.bean.reset.request.ResetRequest;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -367,6 +371,11 @@ public class MockUtils {
                 .build();
     }
 
+    public static FinancingRequestToCancel aFinancingRequestToCancel() {
+        return FinancingRequestToCancel.builder()
+                .build();
+    }
+
     public static FinancingRequestResponse aFinancingRequestResponse() {
         return FinancingRequestResponse.builder()
                 .financingId("financingId")
@@ -395,4 +404,49 @@ public class MockUtils {
         return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0";
     }
 
+    public static CancelationResponse aCancelationSucessResponse() {
+        return CancelationResponse.builder()
+                .financingId("financingId")
+                .cancelationRequestState(CancelationRequestState.DONE)
+                .orderId("orderId")
+                .reason(null)
+                .build();
+    }
+
+    public static CancelationResponse aCancelationFailureResponse() {
+        return CancelationResponse.builder()
+                .financingId("financingId")
+                .cancelationRequestState(CancelationRequestState.FAILED)
+                .orderId("orderId")
+                .reason(null)
+                .build();
+    }
+
+    public static CancelationResponse aCancelationReceivedFailureResponse() {
+        return CancelationResponse.builder()
+                .financingId("financingId")
+                .cancelationRequestState(CancelationRequestState.RECEIVED)
+                .orderId("orderId")
+                .reason(null)
+                .build();
+    }
+
+    public static ResetRequest aPaylineResetRequest(int amountToReset) {
+
+        return ResetRequest.ResetRequestBuilder.aResetRequest()
+                .withPartnerTransactionId("C0000004")
+                .withAmount(aPaylineAmount(amountToReset))
+                .withBuyer(aBuyer())
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withOrder(anOrder())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withPluginConfiguration(aPluginConfiguration())
+                .withSoftDescriptor("softDescriptor")
+                .withTransactionId("PAYLINE" + timestamp).build();
+    }
+
+    public static com.payline.pmapi.bean.common.Amount aPaylineAmount(int amount) {
+        return new com.payline.pmapi.bean.common.Amount(BigInteger.valueOf(amount), Currency.getInstance("EUR"));
+    }
 }

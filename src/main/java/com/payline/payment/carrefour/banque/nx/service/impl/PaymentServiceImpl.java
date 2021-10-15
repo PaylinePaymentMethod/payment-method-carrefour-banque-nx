@@ -58,7 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
             log.error(e);
             paymentResponse = PaymentResponseFailure.PaymentResponseFailureBuilder.aPaymentResponseFailure()
                     .withErrorCode(e.getMessage())
-                    .withFailureCause(FailureCause.COMMUNICATION_ERROR)
+                    .withFailureCause(FailureCause.INVALID_DATA)
                     .build();
         } catch (final MalformedURLException e) {
             log.error(e);

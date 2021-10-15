@@ -3,6 +3,8 @@ package com.payline.payment.carrefour.banque.nx.service.business.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
+import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
+import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
@@ -31,6 +33,8 @@ public class CirceoPaymentService {
     }
 
     public static final String FINANCING_REQUESTS_URL_FRAGMENT = "/financingRequests";
+    public static final String CANCELATION_URL = "/cancelations";
+
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private CirceoHttpClient circeoHttpClient = CirceoHttpClient.getInstance();
@@ -59,6 +63,32 @@ public class CirceoPaymentService {
 
         circeoHttpClient.init(partnerConfiguration);
         return circeoHttpClient.execute(httpPost, FinancingRequestResponse.class);
+    }
+
+    /**
+     * Effectue une demande d'annulation du financement auprès de circeo
+     * @param financingRequest requête d'annulation de financement
+     * @param financingId l'id de la requête de demande de financement
+     * @param partnerConfiguration les partnerConf contenant les infos nécessaires à l'appel à l'API circeo
+     * @return la réponse à la demande d'annulation financement
+     * @throws HttpErrorException en cas d'erreur 4XX (mauvais paramètres de requête)
+     */
+    public CancelationResponse doCancel(final FinancingRequestToCancel financingRequest, final String financingId, final PartnerConfiguration partnerConfiguration) throws HttpErrorException {
+        final String financingRequestJson;
+        try {
+            financingRequestJson = objectMapper.writeValueAsString(financingRequest);
+        } catch (final JsonProcessingException e) {
+            log.error(e);
+            throw new PluginException("Unable to convert FinancingRequest to json", FailureCause.INTERNAL_ERROR);
+        }
+        final HttpEntity httpEntity = new StringEntity(financingRequestJson, ContentType.APPLICATION_JSON);
+
+        final String baseUrl = partnerConfiguration.getProperty(Constants.PartnerConfigurationKeys.CIRCEO_API_URL);
+        final HttpPost httpPost = new HttpPost(baseUrl + FINANCING_REQUESTS_URL_FRAGMENT + "/" + financingId + CANCELATION_URL);
+        httpPost.setEntity(httpEntity);
+
+        circeoHttpClient.init(partnerConfiguration);
+        return circeoHttpClient.execute(httpPost, CancelationResponse.class);
     }
 
     /**
