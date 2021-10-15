@@ -32,6 +32,7 @@ public class StatusToResponseConverter {
         final State financingState = financingRequestStatus.getState();
         switch (financingState) {
             case AUTHORISED:
+            case ACCEPTED:
             case FINANCED:
                 paymentResponse = PaymentResponseSuccess.PaymentResponseSuccessBuilder.aPaymentResponseSuccess()
                         .withPartnerTransactionId(financingId)
