@@ -39,7 +39,7 @@
         ]
       }
     },
-    "miscData": {}
+    "miscData": "{\"test\": \"valeur\"}"
   },
   "customer": {
     "customerId": "22157d87-77e3-4d3e-aaf8-42c618f891e0",

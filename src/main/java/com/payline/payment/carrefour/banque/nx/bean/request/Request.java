@@ -3,6 +3,8 @@ package com.payline.payment.carrefour.banque.nx.bean.request;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.Map;
+
 @Value
 @Builder(toBuilder = true)
 public class Request {
@@ -10,5 +12,5 @@ public class Request {
     int duration;
     CaptureTime captureTime;
     PartnerOrder order;
-    String miscData;
+    Map<String, Object> miscData;
 }

@@ -195,7 +195,8 @@ public class MockUtils {
                 .withPaymentFormContext(aPaymentFormContext())
                 .withPluginConfiguration(aPluginConfiguration())
                 .withSoftDescriptor("softDescriptor")
-                .withTransactionId("PAYLINE" + timestamp);
+                .withTransactionId("PAYLINE" + timestamp)
+                .withMiscData("{\"cle1\": {\"sousCle\": \"sousVal\"}, \"cle2\": \"valeur\"}");
     }
 
     /**

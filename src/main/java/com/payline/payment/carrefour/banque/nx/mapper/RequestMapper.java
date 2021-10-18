@@ -1,7 +1,11 @@
 package com.payline.payment.carrefour.banque.nx.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payline.payment.carrefour.banque.nx.bean.request.CaptureTime;
 import com.payline.payment.carrefour.banque.nx.bean.request.Request;
+import com.payline.payment.carrefour.banque.nx.exception.InvalidDataException;
 import com.payline.payment.carrefour.banque.nx.service.PartnerConfigurationService;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.payment.carrefour.banque.nx.utils.Constants.ContractConfigurationKeys;
@@ -18,12 +22,27 @@ public interface RequestMapper {
 
     RequestMapper INSTANCE = Mappers.getMapper(RequestMapper.class);
     PartnerConfigurationService PARTNER_CONFIGURATION_SERVICE = PartnerConfigurationService.getInstance();
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Mapping(expression = "java(mapOfferId(paymentRequest))", target = "offerId")
     @Mapping(expression = "java(mapDuration(paymentRequest))", target = "duration")
     @Mapping(source = "paymentRequest.captureNow", target = "captureTime")
     @Mapping(source = "paymentRequest", target = "order")
     Request map(PaymentRequest paymentRequest);
+
+    default Map<String, Object> mapMiscData(final String miscDataJson) {
+        final Map<String, Object> result;
+        if (miscDataJson != null) {
+            try {
+                result = objectMapper.readValue(miscDataJson, new TypeReference<Map<String, Object>>() { });
+            } catch (JsonProcessingException e) {
+                throw new InvalidDataException("miscData is not a valid json");
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     default int mapDuration(final PaymentRequest paymentRequest) {
         final String key = paymentRequest.getContractConfiguration().getProperty(ContractConfigurationKeys.DURATION).getValue();
