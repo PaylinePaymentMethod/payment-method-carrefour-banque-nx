@@ -22,7 +22,7 @@ class StatusToResponseConverterTest {
     class FinancingStatusToPaymentResponse {
 
         @ParameterizedTest
-        @EnumSource(value = State.class, names = {"AUTHORISED", "FINANCED"})
+        @EnumSource(value = State.class, names = {"AUTHORISED", "FINANCED", "ACCEPTED"})
         void shouldConvertIntoPaymentSuccess(final State state) {
             final FinancingRequestStatus financingRequestStatus = FinancingRequestStatus.builder()
                     .financingId("financingId")
@@ -90,7 +90,7 @@ class StatusToResponseConverterTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = State.class, names = {"ACCEPTED", "STARTED", "WAITING_FOR_CAPTURE"})
+        @EnumSource(value = State.class, names = {"STARTED", "WAITING_FOR_CAPTURE"})
         void shouldConvertIntoPaymentResponseFailurePartnerUnknownError(final State state) {
             final FinancingRequestStatus financingRequestStatus = FinancingRequestStatus.builder()
                     .financingId("financingId")
