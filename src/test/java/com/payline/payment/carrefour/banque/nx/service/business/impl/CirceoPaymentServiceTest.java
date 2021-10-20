@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payline.payment.carrefour.banque.nx.MockUtils;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
+import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
+import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
@@ -78,6 +80,45 @@ class CirceoPaymentServiceTest {
 
             final PluginException pluginException = assertThrows(PluginException.class,
                     () -> underTest.doPayment(financingRequest, MockUtils.aPartnerConfiguration()));
+
+            assertEquals("Unable to convert FinancingRequest to json", pluginException.getMessage());
+            assertEquals(FailureCause.INTERNAL_ERROR, pluginException.getFailureCause());
+        }
+    }
+
+    @Nested
+    class doCancel {
+
+        @Test
+        void shouldReturnFinancingRequestResponse() throws HttpErrorException, IOException {
+            final String financingId = "financingId";
+            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();;
+            final PartnerConfiguration partnerConfiguration = MockUtils.aPartnerConfiguration();
+            doReturn("{}").when(objectMapper).writeValueAsString(financingRequest);
+            final CancelationResponse cancelationResponse = MockUtils.aCancelationSucessResponse();
+            doReturn(cancelationResponse).when(circeoHttpClient).execute(httpPostArgumentCaptor.capture(), eq(CancelationResponse.class));
+
+            final CancelationResponse response = underTest.doCancel(financingRequest, financingId, partnerConfiguration);
+
+            verify(circeoHttpClient).init(partnerConfiguration);
+            assertEquals(cancelationResponse, response);
+
+            final HttpPost httpPost = httpPostArgumentCaptor.getValue();
+            assertNotNull(httpPost);
+            assertEquals("https://recette.theloanfactory.carrefour-banque.fr/integration/service/financingRequests/financingId/cancelations",
+                    httpPost.getURI().toString());
+            assertEquals(ContentType.APPLICATION_JSON.toString(), httpPost.getEntity().getContentType().getValue());
+            assertEquals("{}", PluginUtils.inputStreamToString(httpPost.getEntity().getContent()));
+        }
+
+        @Test
+        void shouldHandleJsonProcessingException() throws JsonProcessingException {
+            final String financingId = "financingId";
+            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();;
+            doThrow(JsonProcessingException.class).when(objectMapper).writeValueAsString(financingRequest);
+
+            final PluginException pluginException = assertThrows(PluginException.class,
+                    () -> underTest.doCancel(financingRequest, financingId, MockUtils.aPartnerConfiguration()));
 
             assertEquals("Unable to convert FinancingRequest to json", pluginException.getMessage());
             assertEquals(FailureCause.INTERNAL_ERROR, pluginException.getFailureCause());

@@ -100,7 +100,7 @@ class PaymentWithRedirectionServiceImplTest {
             assertTrue(paymentResponse instanceof PaymentResponseFailure);
             final PaymentResponseFailure paymentResponseFailure = (PaymentResponseFailure) paymentResponse;
 
-            assertEquals(FailureCause.COMMUNICATION_ERROR, paymentResponseFailure.getFailureCause());
+            assertEquals(FailureCause.INVALID_DATA, paymentResponseFailure.getFailureCause());
             assertEquals("financingId", paymentResponseFailure.getPartnerTransactionId());
             assertEquals("erreur", paymentResponseFailure.getErrorCode());
         }

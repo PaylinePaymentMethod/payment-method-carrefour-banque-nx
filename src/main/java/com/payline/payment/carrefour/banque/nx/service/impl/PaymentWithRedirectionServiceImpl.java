@@ -46,7 +46,7 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
             paymentResponse = PaymentResponseFailure.PaymentResponseFailureBuilder.aPaymentResponseFailure()
                     .withErrorCode(e.getMessage())
                     .withPartnerTransactionId(financingId)
-                    .withFailureCause(FailureCause.COMMUNICATION_ERROR)
+                    .withFailureCause(FailureCause.INVALID_DATA)
                     .build();
         } catch (final PluginException e) {
             log.error(e.getErrorCode(), e);
