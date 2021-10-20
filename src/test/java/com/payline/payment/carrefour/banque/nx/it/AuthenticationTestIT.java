@@ -3,7 +3,7 @@ package com.payline.payment.carrefour.banque.nx.it;
 import com.payline.payment.carrefour.banque.nx.MockUtils;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
-import com.payline.payment.carrefour.banque.nx.service.business.impl.CirceoHttpClient;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoHttpClient;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;

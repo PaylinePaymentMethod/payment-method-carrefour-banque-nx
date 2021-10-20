@@ -6,7 +6,7 @@ import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestRes
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
 import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestMapper;
-import com.payline.payment.carrefour.banque.nx.service.business.impl.CirceoPaymentService;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.payment.carrefour.banque.nx.service.business.impl.RequiredDataValidator;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class PaymentServiceImpl implements PaymentService {
 
     private RequiredDataValidator requiredDataValidator = RequiredDataValidator.getInstance();
-    private CirceoPaymentService circeoPaymentService = CirceoPaymentService.getInstance();
+    private CirceoProxy circeoProxy = CirceoProxy.getInstance();
     private FinancingRequestMapper financingRequestMapper = FinancingRequestMapper.INSTANCE;
 
     @Override
@@ -37,7 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             requiredDataValidator.validateRequiredDataForFinancingRequest(paymentRequest.getBuyer(), paymentRequest.getOrder());
             final FinancingRequest financingRequest = financingRequestMapper.map(paymentRequest);
-            final FinancingRequestResponse financingRequestResponse = circeoPaymentService.doPayment(financingRequest,
+            final FinancingRequestResponse financingRequestResponse = circeoProxy.doPayment(financingRequest,
                     paymentRequest.getPartnerConfiguration());
             final String partnerTransactionId = financingRequestResponse.getFinancingId();
 

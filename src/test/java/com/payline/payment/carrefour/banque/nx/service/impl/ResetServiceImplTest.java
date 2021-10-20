@@ -1,12 +1,10 @@
 package com.payline.payment.carrefour.banque.nx.service.impl;
 
 import com.payline.payment.carrefour.banque.nx.MockUtils;
-import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationRequestState;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
-import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestCancelationMapper;
-import com.payline.payment.carrefour.banque.nx.service.business.impl.CirceoPaymentService;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
 import com.payline.pmapi.bean.reset.response.ResetResponse;
@@ -25,10 +23,7 @@ import static org.mockito.Mockito.*;
 public class ResetServiceImplTest {
 
     @Mock
-    private CirceoPaymentService circeoPaymentService;
-
-    @Mock
-    private FinancingRequestCancelationMapper financingRequestCancelationMapper;
+    private CirceoProxy circeoProxy;
 
     @InjectMocks
     private ResetServiceImpl underTest;
@@ -36,15 +31,13 @@ public class ResetServiceImplTest {
     @Test
     void reset_RequestTestOK() throws HttpErrorException {
         final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
-        final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
-        doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
         final CancelationResponse cancelationResponse = MockUtils.aCancelationSucessResponse();
-        doReturn(cancelationResponse).when(circeoPaymentService).doCancel(financingRequest, resetRequest.getPartnerTransactionId(), resetRequest.getPartnerConfiguration());
+        doReturn(cancelationResponse).when(circeoProxy).doCancel(resetRequest, resetRequest.getPartnerConfiguration());
         //Test
         final ResetResponse resetResponse = underTest.resetRequest(resetRequest);
 
         assertNotNull(resetResponse);
-        assertEquals("C0000004", resetResponse.getPartnerTransactionId());
+        assertEquals("financingId", resetResponse.getPartnerTransactionId());
         assertEquals(CancelationRequestState.DONE.name(), ((ResetResponseSuccess) resetResponse).getStatusCode());
         assertEquals(ResetResponseSuccess.class, resetResponse.getClass());
     }
@@ -52,10 +45,8 @@ public class ResetServiceImplTest {
     @Test
     void reset_RequestTestFailed() throws HttpErrorException {
         final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
-        final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
-        doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
         final CancelationResponse cancelationResponse = MockUtils.aCancelationFailureResponse();
-        doReturn(cancelationResponse).when(circeoPaymentService).doCancel(financingRequest, resetRequest.getPartnerTransactionId(), resetRequest.getPartnerConfiguration());
+        doReturn(cancelationResponse).when(circeoProxy).doCancel(resetRequest, resetRequest.getPartnerConfiguration());
         //Test
         final ResetResponse resetResponse = underTest.resetRequest(resetRequest);
 
@@ -68,10 +59,8 @@ public class ResetServiceImplTest {
     @Test
     void reset_RequestTestReceived() throws HttpErrorException {
         final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
-        final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
-        doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
         final CancelationResponse cancelationResponse = MockUtils.aCancelationReceivedFailureResponse();
-        doReturn(cancelationResponse).when(circeoPaymentService).doCancel(financingRequest, resetRequest.getPartnerTransactionId(), resetRequest.getPartnerConfiguration());
+        doReturn(cancelationResponse).when(circeoProxy).doCancel(resetRequest, resetRequest.getPartnerConfiguration());
         //Test
         final ResetResponse resetResponse = underTest.resetRequest(resetRequest);
 
@@ -84,10 +73,8 @@ public class ResetServiceImplTest {
     @Test
     void reset_RequestShouldThrowHttpErrorException() throws HttpErrorException {
         final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
-        final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
-        doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
         final HttpErrorException exception = new HttpErrorException(null, "server error");
-        doThrow(exception).when(circeoPaymentService).doCancel(financingRequest, resetRequest.getPartnerTransactionId(), resetRequest.getPartnerConfiguration()); //Test
+        doThrow(exception).when(circeoProxy).doCancel(resetRequest, resetRequest.getPartnerConfiguration());
         //Test
         final ResetResponse resetResponse = underTest.resetRequest(resetRequest);
 

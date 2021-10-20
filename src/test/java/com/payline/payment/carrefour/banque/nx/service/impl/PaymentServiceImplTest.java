@@ -6,7 +6,7 @@ import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestRes
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
 import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestMapper;
-import com.payline.payment.carrefour.banque.nx.service.business.impl.CirceoPaymentService;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.payment.carrefour.banque.nx.service.business.impl.RequiredDataValidator;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -34,7 +34,7 @@ class PaymentServiceImplTest {
     private RequiredDataValidator requiredDataValidator;
 
     @Mock
-    private CirceoPaymentService circeoPaymentService;
+    private CirceoProxy circeoProxy;
 
     @Mock
     private FinancingRequestMapper financingRequestMapper;
@@ -48,7 +48,7 @@ class PaymentServiceImplTest {
         final FinancingRequest financingRequest = MockUtils.aFinancingRequest();
         doReturn(financingRequest).when(financingRequestMapper).map(paymentRequest);
         final FinancingRequestResponse financingRequestResponse = MockUtils.aFinancingRequestResponse();
-        doReturn(financingRequestResponse).when(circeoPaymentService).doPayment(financingRequest, paymentRequest.getPartnerConfiguration());
+        doReturn(financingRequestResponse).when(circeoProxy).doPayment(financingRequest, paymentRequest.getPartnerConfiguration());
 
         final PaymentResponse paymentResponse = underTest.paymentRequest(paymentRequest);
 
@@ -73,7 +73,7 @@ class PaymentServiceImplTest {
             final FinancingRequest financingRequest = MockUtils.aFinancingRequest();
             doReturn(financingRequest).when(financingRequestMapper).map(paymentRequest);
             final HttpErrorException exception = new HttpErrorException(null, "server error");
-            doThrow(exception).when(circeoPaymentService).doPayment(financingRequest, paymentRequest.getPartnerConfiguration());
+            doThrow(exception).when(circeoProxy).doPayment(financingRequest, paymentRequest.getPartnerConfiguration());
 
             final PaymentResponse paymentResponse = underTest.paymentRequest(paymentRequest);
 
