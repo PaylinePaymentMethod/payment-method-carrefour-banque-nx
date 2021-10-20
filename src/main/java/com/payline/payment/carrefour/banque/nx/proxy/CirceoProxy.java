@@ -1,4 +1,4 @@
-package com.payline.payment.carrefour.banque.nx.service.business.impl;
+package com.payline.payment.carrefour.banque.nx.proxy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,9 +9,11 @@ import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestRes
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
+import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestCancelationMapper;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import com.payline.pmapi.bean.reset.request.ResetRequest;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -20,20 +22,22 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
 @Log4j2
-public class CirceoPaymentService {
+public class CirceoProxy {
 
     private static class Holder {
-        private static final CirceoPaymentService INSTANCE = new CirceoPaymentService();
+        private static final CirceoProxy INSTANCE = new CirceoProxy();
     }
-    public static CirceoPaymentService getInstance() {
+    public static CirceoProxy getInstance() {
         return Holder.INSTANCE;
     }
 
-    CirceoPaymentService() {
+    CirceoProxy() {
     }
 
     public static final String FINANCING_REQUESTS_URL_FRAGMENT = "/financingRequests";
     public static final String CANCELATION_URL = "/cancelations";
+
+    private FinancingRequestCancelationMapper financingRequestCancelationMapper = FinancingRequestCancelationMapper.INSTANCE;
 
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -66,15 +70,15 @@ public class CirceoPaymentService {
     }
 
     /**
-     * Effectue une demande d'annulation du financement auprès de circeo
-     * @param financingRequest requête d'annulation de financement
-     * @param financingId l'id de la requête de demande de financement
+     * Effectue une demande d'annulation ou de remboursement du financement auprès de circeo
      * @param partnerConfiguration les partnerConf contenant les infos nécessaires à l'appel à l'API circeo
      * @return la réponse à la demande d'annulation financement
      * @throws HttpErrorException en cas d'erreur 4XX (mauvais paramètres de requête)
      */
-    public CancelationResponse doCancel(final FinancingRequestToCancel financingRequest, final String financingId, final PartnerConfiguration partnerConfiguration) throws HttpErrorException {
+    public CancelationResponse doCancel(final ResetRequest resetRequest, final PartnerConfiguration partnerConfiguration) throws HttpErrorException {
         final String financingRequestJson;
+        final FinancingRequestToCancel financingRequest = financingRequestCancelationMapper.map(resetRequest);
+        final String financingId = resetRequest.getPartnerTransactionId();
         try {
             financingRequestJson = objectMapper.writeValueAsString(financingRequest);
         } catch (final JsonProcessingException e) {
@@ -106,4 +110,5 @@ public class CirceoPaymentService {
         circeoHttpClient.init(partnerConfiguration);
         return circeoHttpClient.execute(httpGet, FinancingRequestStatus.class);
     }
+
 }

@@ -1,4 +1,4 @@
-package com.payline.payment.carrefour.banque.nx.service.business.impl;
+package com.payline.payment.carrefour.banque.nx.proxy;
 
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuthConstants;
@@ -7,6 +7,7 @@ import com.payline.payment.carrefour.banque.nx.MockUtils;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoHttpClient;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;

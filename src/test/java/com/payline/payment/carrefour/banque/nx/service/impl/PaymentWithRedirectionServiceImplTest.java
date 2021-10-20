@@ -3,7 +3,7 @@ package com.payline.payment.carrefour.banque.nx.service.impl;
 import com.payline.payment.carrefour.banque.nx.MockUtils;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
-import com.payline.payment.carrefour.banque.nx.service.business.impl.CirceoPaymentService;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.payment.carrefour.banque.nx.service.business.impl.StatusToResponseConverter;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.doThrow;
 class PaymentWithRedirectionServiceImplTest {
 
     @Mock
-    private CirceoPaymentService circeoPaymentService;
+    private CirceoProxy circeoProxy;
 
     @Mock
     private StatusToResponseConverter statusToResponseConverter;
@@ -71,7 +71,7 @@ class PaymentWithRedirectionServiceImplTest {
             final FinancingRequestStatus financingRequestStatus = MockUtils.aFinancingRequestStatus();
             final PaymentResponseSuccess paymentResponseSuccess = MockUtils.aPaymentResponseSuccess();
 
-            doReturn(financingRequestStatus).when(circeoPaymentService).getStatus("financingId", partnerConfiguration);
+            doReturn(financingRequestStatus).when(circeoProxy).getStatus("financingId", partnerConfiguration);
             doReturn(paymentResponseSuccess).when(statusToResponseConverter).financingStatusToPaymentResponse(financingRequestStatus);
 
             final PaymentResponse paymentResponse = underTest.retrieveTransactionStatus("financingId", partnerConfiguration);
@@ -93,7 +93,7 @@ class PaymentWithRedirectionServiceImplTest {
         @Test
         void shouldReturnPaymentResponseFailureOnHttpErrorException() throws HttpErrorException {
             final PartnerConfiguration partnerConfiguration = MockUtils.aPartnerConfiguration();
-            doThrow(new HttpErrorException("code", "erreur")).when(circeoPaymentService).getStatus("financingId", partnerConfiguration);
+            doThrow(new HttpErrorException("code", "erreur")).when(circeoProxy).getStatus("financingId", partnerConfiguration);
 
             final PaymentResponse paymentResponse = underTest.retrieveTransactionStatus("financingId", partnerConfiguration);
 
@@ -108,7 +108,7 @@ class PaymentWithRedirectionServiceImplTest {
         @Test
         void shouldReturnPaymentResponseFailureOnRuntimeException() throws HttpErrorException {
             final PartnerConfiguration partnerConfiguration = MockUtils.aPartnerConfiguration();
-            doThrow(new RuntimeException("erreur")).when(circeoPaymentService).getStatus("financingId", partnerConfiguration);
+            doThrow(new RuntimeException("erreur")).when(circeoProxy).getStatus("financingId", partnerConfiguration);
 
             final PaymentResponse paymentResponse = underTest.retrieveTransactionStatus("financingId", partnerConfiguration);
 

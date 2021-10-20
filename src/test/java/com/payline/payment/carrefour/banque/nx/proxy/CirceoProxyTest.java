@@ -1,18 +1,23 @@
-package com.payline.payment.carrefour.banque.nx.service.business.impl;
+package com.payline.payment.carrefour.banque.nx.proxy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payline.payment.carrefour.banque.nx.MockUtils;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
+import com.payline.payment.carrefour.banque.nx.bean.response.CancelationRequestState;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
+import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestCancelationMapper;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoHttpClient;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.payment.carrefour.banque.nx.utils.PluginUtils;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import com.payline.pmapi.bean.reset.request.ResetRequest;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -32,7 +37,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CirceoPaymentServiceTest {
+class CirceoProxyTest {
 
     @Captor
     private ArgumentCaptor<HttpPost> httpPostArgumentCaptor;
@@ -46,8 +51,11 @@ class CirceoPaymentServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private FinancingRequestCancelationMapper financingRequestCancelationMapper ;
+
     @InjectMocks
-    private CirceoPaymentService underTest;
+    private CirceoProxy underTest;
 
     @Nested
     class DoPayment {
@@ -91,21 +99,23 @@ class CirceoPaymentServiceTest {
 
         @Test
         void shouldReturnFinancingRequestResponse() throws HttpErrorException, IOException {
-            final String financingId = "financingId";
-            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();;
+            final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
+            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
             final PartnerConfiguration partnerConfiguration = MockUtils.aPartnerConfiguration();
-            doReturn("{}").when(objectMapper).writeValueAsString(financingRequest);
             final CancelationResponse cancelationResponse = MockUtils.aCancelationSucessResponse();
+            //Mock
+            doReturn("{}").when(objectMapper).writeValueAsString(financingRequest);
+            doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
             doReturn(cancelationResponse).when(circeoHttpClient).execute(httpPostArgumentCaptor.capture(), eq(CancelationResponse.class));
-
-            final CancelationResponse response = underTest.doCancel(financingRequest, financingId, partnerConfiguration);
+            //Test
+            final CancelationResponse response = underTest.doCancel(resetRequest, partnerConfiguration);
 
             verify(circeoHttpClient).init(partnerConfiguration);
             assertEquals(cancelationResponse, response);
 
             final HttpPost httpPost = httpPostArgumentCaptor.getValue();
             assertNotNull(httpPost);
-            assertEquals("https://recette.theloanfactory.carrefour-banque.fr/integration/service/financingRequests/financingId/cancelations",
+            assertEquals("https://recette.theloanfactory.carrefour-banque.fr/integration/service/financingRequests/C0000004/cancelations",
                     httpPost.getURI().toString());
             assertEquals(ContentType.APPLICATION_JSON.toString(), httpPost.getEntity().getContentType().getValue());
             assertEquals("{}", PluginUtils.inputStreamToString(httpPost.getEntity().getContent()));
@@ -113,12 +123,13 @@ class CirceoPaymentServiceTest {
 
         @Test
         void shouldHandleJsonProcessingException() throws JsonProcessingException {
-            final String financingId = "financingId";
-            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();;
+            final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
+            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
+            doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
             doThrow(JsonProcessingException.class).when(objectMapper).writeValueAsString(financingRequest);
 
             final PluginException pluginException = assertThrows(PluginException.class,
-                    () -> underTest.doCancel(financingRequest, financingId, MockUtils.aPartnerConfiguration()));
+                    () -> underTest.doCancel(resetRequest, MockUtils.aPartnerConfiguration()));
 
             assertEquals("Unable to convert FinancingRequest to json", pluginException.getMessage());
             assertEquals(FailureCause.INTERNAL_ERROR, pluginException.getFailureCause());
@@ -141,5 +152,21 @@ class CirceoPaymentServiceTest {
         assertNotNull(httpGet);
         assertEquals("https://recette.theloanfactory.carrefour-banque.fr/integration/service/financingRequests/financingId",
                 httpGet.getURI().toString());
+    }
+
+    @Test
+    void shouldGetCancelationRequestState() throws HttpErrorException, JsonProcessingException {
+        final ResetRequest resetRequest = MockUtils.aPaylineResetRequest(1000);
+        final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
+        final PartnerConfiguration partnerConfiguration = resetRequest.getPartnerConfiguration();
+        final CancelationResponse cancelationResponse = MockUtils.aCancelationSucessResponse();
+        //Mock
+        doReturn(financingRequest).when(financingRequestCancelationMapper).map(resetRequest);
+        doReturn("{}").when(objectMapper).writeValueAsString(financingRequest);
+        doReturn(cancelationResponse).when(circeoHttpClient).execute(httpPostArgumentCaptor.capture(), eq(CancelationResponse.class));
+        //Test
+        final CancelationResponse response = underTest.doCancel(resetRequest, partnerConfiguration);
+
+        assertEquals(CancelationRequestState.DONE, response.getCancelationRequestState());
     }
 }

@@ -1,4 +1,4 @@
-package com.payline.payment.carrefour.banque.nx.service.business.impl;
+package com.payline.payment.carrefour.banque.nx.proxy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.builder.ServiceBuilder;
