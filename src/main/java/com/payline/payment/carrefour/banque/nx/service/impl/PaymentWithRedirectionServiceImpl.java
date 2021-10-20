@@ -4,7 +4,7 @@ import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestSta
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.InvalidDataException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
-import com.payline.payment.carrefour.banque.nx.service.business.impl.CirceoPaymentService;
+import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.payment.carrefour.banque.nx.service.business.impl.StatusToResponseConverter;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.pmapi.bean.common.FailureCause;
@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirectionService {
 
-    private CirceoPaymentService circeoPaymentService = CirceoPaymentService.getInstance();
+    private CirceoProxy circeoProxy = CirceoProxy.getInstance();
     private StatusToResponseConverter statusToResponseConverter = StatusToResponseConverter.getInstance();
 
     @Override
@@ -39,7 +39,7 @@ public class PaymentWithRedirectionServiceImpl implements PaymentWithRedirection
             if (financingId == null) {
                 throw new InvalidDataException("Missing financing ID from request context");
             }
-            final FinancingRequestStatus financingRequestStatus = circeoPaymentService.getStatus(financingId, partnerConfiguration);
+            final FinancingRequestStatus financingRequestStatus = circeoProxy.getStatus(financingId, partnerConfiguration);
             paymentResponse = statusToResponseConverter.financingStatusToPaymentResponse(financingRequestStatus);
         } catch (final HttpErrorException e) {
             log.error(e);

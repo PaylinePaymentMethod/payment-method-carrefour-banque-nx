@@ -36,7 +36,8 @@ public interface CancelationRequestMapper {
         final Currency currency = resetRequest.getOrder().getAmount().getCurrency();
         final BigInteger canceledAmount = resetRequest.getAmount().getAmountInSmallestUnit();
         final BigInteger orderAmount = resetRequest.getOrder().getAmount().getAmountInSmallestUnit();
-        final Amount newFinancedAmount = new Amount(orderAmount.subtract(canceledAmount), currency);
+        final BigInteger oldFinancedAmount = orderAmount.subtract(resetRequest.getTotalResetedAmount().getAmountInSmallestUnit());
+        final Amount newFinancedAmount = new Amount(oldFinancedAmount.subtract(canceledAmount), currency);
         final String newFinancedAmountCalculated = AmountMapper.INSTANCE.mapAmount(newFinancedAmount);
         return Float.parseFloat(newFinancedAmountCalculated);
     }

@@ -10,6 +10,7 @@ import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestRes
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.payment.carrefour.banque.nx.utils.TestUtils;
+import com.payline.pmapi.bean.common.Amount;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
@@ -23,9 +24,11 @@ import com.payline.pmapi.bean.payment.response.buyerpaymentidentifier.impl.Empty
 import com.payline.pmapi.bean.payment.response.impl.PaymentResponseSuccess;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormConfigurationRequest;
 import com.payline.pmapi.bean.paymentform.request.PaymentFormLogoRequest;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -437,6 +440,23 @@ public class MockUtils {
         return ResetRequest.ResetRequestBuilder.aResetRequest()
                 .withPartnerTransactionId("C0000004")
                 .withAmount(aPaylineAmount(amountToReset))
+                .withBuyer(aBuyer())
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withOrder(anOrder())
+                .withTotalResetedAmount(aPaylineAmount(0))
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withPluginConfiguration(aPluginConfiguration())
+                .withSoftDescriptor("softDescriptor")
+                .withTransactionId("PAYLINE" + timestamp).build();
+    }
+
+    public static RefundRequest aPaylineRefundRequest(int amountToReset) {
+
+        return RefundRequest.RefundRequestBuilder.aRefundRequest()
+                .withPartnerTransactionId("financingId")
+                .withAmount(aPaylineAmount(amountToReset))
+                .withTotalRefundedAmount(aPaylineAmount(0))
                 .withBuyer(aBuyer())
                 .withContractConfiguration(aContractConfiguration())
                 .withEnvironment(anEnvironment())
