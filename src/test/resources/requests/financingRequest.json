@@ -1,0 +1,97 @@
+{
+  "header": {
+    "merchantId": "310001",
+    "messageId": "e77c172f-5b36-404c-9205-b9b633dfdee2",
+    "creationDateTime": "2019-08-24T14:15:22Z",
+    "redirectPaymentSuccessUrl": "https://myshop.com/redirectHereA",
+    "redirectPaymentFailureUrl": "https://myshop.com/redirectHereB",
+    "redirectPaymentCancelUrl": "https://myshop.com/redirectHereC",
+    "callbackUrl": "https://myserver.com/notifyMeHEre"
+  },
+  "request": {
+    "offerId": "WEBPOS-OWN",
+    "duration": 3,
+    "captureTime": "PAYMENT",
+    "order": {
+      "orderId": "5f5e7822-2d67-4072-8381-fc726db2d6e9",
+      "orderDateTime": "2019-08-24T14:15:22Z",
+      "channel": "DESKTOP",
+      "cart": {
+        "totalFinancedAmount": "200.43",
+        "currency": "EUR",
+        "deliveryMode": "PICKUP_AT_MERCHANT",
+        "ipV4": "192.168.0.1",
+        "ipV6": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+        "cartItems": [
+          {
+            "totalPrice": "200.43",
+            "unitPrice": "200.43",
+            "currency": "EUR",
+            "quantity": "1",
+            "universe": "string",
+            "category": "string",
+            "brand": "string",
+            "model": "string",
+            "reference": "string",
+            "description": "string",
+            "pictureUri": "https://myPictureServer/picture.png"
+          }
+        ]
+      }
+    },
+    "miscData": "{\"test\": \"valeur\"}"
+  },
+  "customer": {
+    "customerId": "22157d87-77e3-4d3e-aaf8-42c618f891e0",
+    "identification": {
+      "title": "MR",
+      "surname": "DOE",
+      "firstname": "JOHN",
+      "birthName": "SMITH",
+      "dateOfBirth": "2019-08-24",
+      "placeOfBirth": "PARIS 1ER ARRONDISSEMENT",
+      "placeOfBirthCode": "75101",
+      "placeOfBirthCountry": "FR"
+    },
+    "accountData": {
+      "creationDateTime": "2019-08-24T14:15:22Z",
+      "hadPreviousOrdersInLast2Years": true,
+      "previousOrders": [
+        {
+          "id": "718c8b0a-9286-4d1c-be61-c51bbf7ca507",
+          "dateTime": "2019-08-24T14:15:22Z"
+        }
+      ],
+      "canceledOrderCountInLast2Years": 0,
+      "paymentIncidentCountInLast2Years": 0,
+      "changedShippingAddressToday": true,
+      "previousShippingAddress": {
+        "streetNumberAndNameLine1": "10 rue Sesame",
+        "streetNameLine2": "Building D",
+        "townName": "Paris",
+        "postalCode": "75001",
+        "country": "FR"
+      },
+      "changedPhoneNumberToday": true,
+      "previousMobileNumber": "0033601020304"
+    },
+    "contactData": {
+      "mobile": "0033601020304",
+      "email": "user@example.com"
+    },
+    "billingAddress": {
+      "streetNumberAndNameLine1": "10 rue Sesame",
+      "streetNameLine2": "Building D",
+      "townName": "Paris",
+      "postalCode": "75001",
+      "country": "FR"
+    },
+    "shippingAddress": {
+      "streetNumberAndNameLine1": "10 rue Sesame",
+      "streetNameLine2": "Building D",
+      "townName": "Paris",
+      "postalCode": "75001",
+      "country": "FR"
+    }
+  }
+}
