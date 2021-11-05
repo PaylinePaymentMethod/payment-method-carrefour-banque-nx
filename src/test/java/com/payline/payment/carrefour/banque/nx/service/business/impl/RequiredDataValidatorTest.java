@@ -230,27 +230,6 @@ class RequiredDataValidatorTest {
 
         @ParameterizedTest
         @NullAndEmptySource
-        void nullAndEmptyBuyerDeliveryAddressStreetNumber(final String streetNumber) {
-            final Order order = MockUtils.anOrder();
-            final Map<Buyer.PhoneNumberType, String> phoneNumbers = new HashMap<>();
-            phoneNumbers.put(Buyer.PhoneNumberType.CELLULAR, "mobilePhone");
-            final Map<Buyer.AddressType, Buyer.Address> addresses = new HashMap<>();
-            addresses.put(Buyer.AddressType.DELIVERY, Buyer.Address.AddressBuilder.anAddress()
-                    .withStreetNumber(streetNumber)
-                    .build());
-            final Buyer buyer = Buyer.BuyerBuilder.aBuyer()
-                    .withCustomerIdentifier("customerIdentifier")
-                    .withFullName(new Buyer.FullName("firstname", "lastName", null))
-                    .withEmail("email")
-                    .withPhoneNumbers(phoneNumbers)
-                    .withAddresses(addresses)
-                    .build();
-
-            assertInvalidDataException(buyer, order, "buyer.shippingAdress.streetNumber is required");
-        }
-
-        @ParameterizedTest
-        @NullAndEmptySource
         void nullAndEmptyBuyerDeliveryAddressStreet1(final String street1) {
             final Order order = MockUtils.anOrder();
             final Map<Buyer.PhoneNumberType, String> phoneNumbers = new HashMap<>();
@@ -360,28 +339,6 @@ class RequiredDataValidatorTest {
                     .build();
 
             assertInvalidDataException(buyer, order, "buyer.billingAddress is required");
-        }
-
-        @ParameterizedTest
-        @NullAndEmptySource
-        void nullAndEmptyBuyerBillingAddressStreetNumber(final String streetNumber) {
-            final Order order = MockUtils.anOrder();
-            final Map<Buyer.PhoneNumberType, String> phoneNumbers = new HashMap<>();
-            phoneNumbers.put(Buyer.PhoneNumberType.CELLULAR, "mobilePhone");
-            final Map<Buyer.AddressType, Buyer.Address> addresses = new HashMap<>();
-            addresses.put(Buyer.AddressType.DELIVERY, MockUtils.aPaylineAddress());
-            addresses.put(Buyer.AddressType.BILLING, Buyer.Address.AddressBuilder.anAddress()
-                    .withStreetNumber(streetNumber)
-                    .build());
-            final Buyer buyer = Buyer.BuyerBuilder.aBuyer()
-                    .withCustomerIdentifier("customerIdentifier")
-                    .withFullName(new Buyer.FullName("firstname", "lastName", null))
-                    .withEmail("email")
-                    .withPhoneNumbers(phoneNumbers)
-                    .withAddresses(addresses)
-                    .build();
-
-            assertInvalidDataException(buyer, order, "buyer.billingAddress.streetNumber is required");
         }
 
         @ParameterizedTest

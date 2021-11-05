@@ -91,7 +91,7 @@ public class MockUtils {
     public static Buyer aBuyer() {
         final Map<Buyer.AddressType, Buyer.Address> addresses = new HashMap<>();
         addresses.put(Buyer.AddressType.BILLING, Buyer.Address.AddressBuilder.anAddress()
-                .withStreetNumber("1")
+                .withStreetNumber("")
                 .withStreet1("billing1")
                 .withStreet2("billing2")
                 .withCity("billingCity")
