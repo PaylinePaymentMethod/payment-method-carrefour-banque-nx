@@ -1,6 +1,7 @@
 package com.payline.payment.carrefour.banque.nx.mapper;
 
 import com.payline.payment.carrefour.banque.nx.bean.request.PartnerAddress;
+import com.payline.payment.carrefour.banque.nx.utils.PluginUtils;
 import com.payline.pmapi.bean.common.Buyer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,6 +20,7 @@ public interface AddressMapper {
     PartnerAddress map(Buyer.Address address);
 
     default String mapStreetNumberAndNameLine1(final Buyer.Address address) {
-        return address.getStreetNumber() + " " + address.getStreet1();
+        return PluginUtils.isEmpty(address.getStreetNumber()) ?
+                address.getStreet1() : address.getStreetNumber() + " " + address.getStreet1();
     }
 }

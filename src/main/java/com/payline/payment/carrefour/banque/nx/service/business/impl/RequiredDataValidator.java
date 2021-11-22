@@ -43,7 +43,6 @@ public class RequiredDataValidator {
         if (shippingAddress == null) {
             throw new InvalidDataException("buyer.shippingAdress is required");
         }
-        checkNotEmpty(shippingAddress.getStreetNumber(), "buyer.shippingAdress.streetNumber is required");
         checkNotEmpty(shippingAddress.getStreet1(), "buyer.shippingAdress.street1 is required");
         checkNotEmpty(shippingAddress.getCity(), "buyer.shippingAdress.cityName is required");
         checkNotEmpty(shippingAddress.getZipCode(), "buyer.shippingAdress.zipCode is required");
@@ -52,7 +51,6 @@ public class RequiredDataValidator {
         if (billingAddress == null) {
             throw new InvalidDataException("buyer.billingAddress is required");
         }
-        checkNotEmpty(billingAddress.getStreetNumber(), "buyer.billingAddress.streetNumber is required");
         checkNotEmpty(billingAddress.getStreet1(), "buyer.billingAddress.street1 is required");
         checkNotEmpty(billingAddress.getCity(), "buyer.billingAddress.cityName is required");
         checkNotEmpty(billingAddress.getZipCode(), "buyer.billingAddress.zipCode is required");

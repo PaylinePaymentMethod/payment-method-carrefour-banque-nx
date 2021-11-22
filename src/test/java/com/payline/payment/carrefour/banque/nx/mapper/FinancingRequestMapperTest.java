@@ -116,7 +116,7 @@ class FinancingRequestMapperTest {
         assertEquals("test@mail.com", customer.getContactData().getEmail());
 
         // billing address
-        assertEquals("1 billing1" , customer.getBillingAddress().getStreetNumberAndNameLine1());
+        assertEquals("billing1" , customer.getBillingAddress().getStreetNumberAndNameLine1());
         assertEquals("billing2" , customer.getBillingAddress().getStreetNameLine2());
         assertEquals("billingCity" , customer.getBillingAddress().getTownName());
         assertEquals("billingZipCode" , customer.getBillingAddress().getPostalCode());
