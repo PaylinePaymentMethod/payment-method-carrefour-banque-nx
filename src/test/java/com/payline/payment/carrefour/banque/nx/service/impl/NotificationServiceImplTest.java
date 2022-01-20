@@ -60,7 +60,7 @@ class NotificationServiceImplTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = State.class, names = {"STARTED"})
+        @EnumSource(value = State.class, names = {"STARTED", "INITIATED"})
         void shouldIgnoreStatus(final State ignoredState) throws JsonProcessingException {
             final NotificationRequest notificationRequest = MockUtils.aPaylineNotificationRequest("body");
             final FinancingRequestStatus financingRequestStatus = MockUtils.aFinancingRequestStatus().toBuilder().state(ignoredState).build();
