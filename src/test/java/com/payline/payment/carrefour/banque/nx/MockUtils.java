@@ -1,16 +1,19 @@
 package com.payline.payment.carrefour.banque.nx;
 
 
+import com.payline.payment.carrefour.banque.nx.bean.request.DeliveryUpdateRequestToCapture;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
 import com.payline.payment.carrefour.banque.nx.bean.request.State;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationRequestState;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
+import com.payline.payment.carrefour.banque.nx.bean.response.DeliveryUpdateRequestState;
+import com.payline.payment.carrefour.banque.nx.bean.response.DeliveryUpdateResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.payment.carrefour.banque.nx.utils.TestUtils;
-import com.payline.pmapi.bean.common.Amount;
+import com.payline.pmapi.bean.capture.request.CaptureRequest;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
@@ -28,7 +31,6 @@ import com.payline.pmapi.bean.refund.request.RefundRequest;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
 
 import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -380,6 +382,11 @@ public class MockUtils {
                 .build();
     }
 
+    public static DeliveryUpdateRequestToCapture aDeliveryRequestToCapture() {
+        return DeliveryUpdateRequestToCapture.builder()
+                .build();
+    }
+
     public static FinancingRequestResponse aFinancingRequestResponse() {
         return FinancingRequestResponse.builder()
                 .financingId("financingId")
@@ -435,6 +442,33 @@ public class MockUtils {
                 .build();
     }
 
+    public static DeliveryUpdateResponse aDeliveryUpdateResponse() {
+        return DeliveryUpdateResponse.builder()
+                .financingId("C0000005")
+                .deliveryRequestState(DeliveryUpdateRequestState.DONE)
+                .orderId("orderId")
+                .reason(null)
+                .build();
+    }
+
+    public static DeliveryUpdateResponse aDeliveryUpdateFailureResponse() {
+        return DeliveryUpdateResponse.builder()
+                .financingId("financingId")
+                .deliveryRequestState(DeliveryUpdateRequestState.FAILED)
+                .orderId("orderId")
+                .reason(null)
+                .build();
+    }
+
+    public static DeliveryUpdateResponse aDeliveryUpdateReceivedFailureResponse() {
+        return DeliveryUpdateResponse.builder()
+                .financingId("financingId")
+                .deliveryRequestState(DeliveryUpdateRequestState.RECEIVED)
+                .orderId("orderId")
+                .reason(null)
+                .build();
+    }
+
     public static ResetRequest aPaylineResetRequest(int amountToReset) {
 
         return ResetRequest.ResetRequestBuilder.aResetRequest()
@@ -450,6 +484,22 @@ public class MockUtils {
                 .withSoftDescriptor("softDescriptor")
                 .withTransactionId("PAYLINE" + timestamp).build();
     }
+
+    public static CaptureRequest aPaylineCaptureRequest(int amountToReset) {
+
+        return CaptureRequest.CaptureRequestBuilder.aCaptureRequest()
+                .withPartnerTransactionId("C0000005")
+                .withAmount(aPaylineAmount(amountToReset))
+                .withBuyer(aBuyer())
+                .withContractConfiguration(aContractConfiguration())
+                .withEnvironment(anEnvironment())
+                .withOrder(anOrder())
+                .withPartnerConfiguration(aPartnerConfiguration())
+                .withPluginConfiguration(aPluginConfiguration())
+                .withSoftDescriptor("softDescriptor")
+                .withTransactionId("PAYLINE" + timestamp).build();
+    }
+
 
     public static RefundRequest aPaylineRefundRequest(int amountToReset) {
 

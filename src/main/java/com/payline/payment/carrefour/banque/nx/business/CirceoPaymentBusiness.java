@@ -1,6 +1,8 @@
 package com.payline.payment.carrefour.banque.nx.business;
 
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
+import com.payline.payment.carrefour.banque.nx.bean.response.DeliveryUpdateResponse;
+import com.payline.pmapi.bean.capture.response.CaptureResponse;
 import com.payline.pmapi.bean.refund.request.RefundRequest;
 import com.payline.pmapi.bean.refund.response.RefundResponse;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
@@ -28,4 +30,12 @@ public interface CirceoPaymentBusiness {
       * @return resetResponse
       */
      ResetResponse handleResetResponse(CancelationResponse cancelationResponse);
+
+
+     /**
+      * Permet de convertir la réponse d'une CaptureCirceo.
+      * @param deliveryResponse la réponse de la requête de livraison des fonds.
+      * @return captureResponse
+      */
+     CaptureResponse handleCaptureResponse(DeliveryUpdateResponse deliveryResponse);
 }

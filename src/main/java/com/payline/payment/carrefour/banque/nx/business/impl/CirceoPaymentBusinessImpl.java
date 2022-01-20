@@ -2,7 +2,12 @@ package com.payline.payment.carrefour.banque.nx.business.impl;
 
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationRequestState;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
+import com.payline.payment.carrefour.banque.nx.bean.response.DeliveryUpdateRequestState;
+import com.payline.payment.carrefour.banque.nx.bean.response.DeliveryUpdateResponse;
 import com.payline.payment.carrefour.banque.nx.business.CirceoPaymentBusiness;
+import com.payline.pmapi.bean.capture.response.CaptureResponse;
+import com.payline.pmapi.bean.capture.response.impl.CaptureResponseFailure;
+import com.payline.pmapi.bean.capture.response.impl.CaptureResponseSuccess;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.refund.request.RefundRequest;
 import com.payline.pmapi.bean.refund.response.RefundResponse;
@@ -92,5 +97,38 @@ public class CirceoPaymentBusinessImpl implements CirceoPaymentBusiness {
                     .build();
         }
         return resetResponse;
+    }
+
+    @Override
+    public CaptureResponse handleCaptureResponse(final DeliveryUpdateResponse deliveryResponse) {
+        final String financingId = deliveryResponse.getFinancingId();
+        final DeliveryUpdateRequestState cancelResponseStatus = deliveryResponse.getDeliveryRequestState();
+        final CaptureResponse captureResponse;
+        switch (cancelResponseStatus) {
+            case DONE :
+                captureResponse = CaptureResponseSuccess.CaptureResponseSuccessBuilder
+                        .aCaptureResponseSuccess()
+                        .withPartnerTransactionId(financingId)
+                        .withStatusCode(cancelResponseStatus.name())
+                        .build();
+                        break;
+            case RECEIVED:
+                captureResponse = CaptureResponseFailure.CaptureResponseFailureBuilder
+                        .aCaptureResponseFailure()
+                        .withPartnerTransactionId(financingId)
+                        .withErrorCode(cancelResponseStatus.name())
+                        .withFailureCause(FailureCause.PARTNER_UNKNOWN_ERROR)
+                        .build();
+                break;
+            default :
+                captureResponse = CaptureResponseFailure.CaptureResponseFailureBuilder
+                        .aCaptureResponseFailure()
+                        .withPartnerTransactionId(financingId)
+                        .withErrorCode(cancelResponseStatus.name())
+                        .withFailureCause(FailureCause.PAYMENT_PARTNER_ERROR)
+                        .build();
+                break;
+        }
+        return captureResponse;
     }
 }

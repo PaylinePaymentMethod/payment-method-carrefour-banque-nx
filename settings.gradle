@@ -1,5 +1,6 @@
 rootProject.name = 'payment-method-carrefour-banque-nx'
 
+
 if (file('../payline-payment-method-api').exists()) {
     includeBuild '../payline-payment-method-api'
 }

@@ -3,18 +3,23 @@ package com.payline.payment.carrefour.banque.nx.proxy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payline.payment.carrefour.banque.nx.MockUtils;
+import com.payline.payment.carrefour.banque.nx.bean.request.DeliveryUpdateRequest;
+import com.payline.payment.carrefour.banque.nx.bean.request.DeliveryUpdateRequestToCapture;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequest;
 import com.payline.payment.carrefour.banque.nx.bean.request.FinancingRequestToCancel;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationRequestState;
 import com.payline.payment.carrefour.banque.nx.bean.response.CancelationResponse;
+import com.payline.payment.carrefour.banque.nx.bean.response.DeliveryUpdateResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestResponse;
 import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestStatus;
 import com.payline.payment.carrefour.banque.nx.exception.HttpErrorException;
 import com.payline.payment.carrefour.banque.nx.exception.PluginException;
 import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestCancelationMapper;
+import com.payline.payment.carrefour.banque.nx.mapper.FinancingRequestDeliveryMapper;
 import com.payline.payment.carrefour.banque.nx.proxy.CirceoHttpClient;
 import com.payline.payment.carrefour.banque.nx.proxy.CirceoProxy;
 import com.payline.payment.carrefour.banque.nx.utils.PluginUtils;
+import com.payline.pmapi.bean.capture.request.CaptureRequest;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
@@ -52,7 +57,10 @@ class CirceoProxyTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private FinancingRequestCancelationMapper financingRequestCancelationMapper ;
+    private FinancingRequestCancelationMapper financingRequestCancelationMapper;
+
+    @Mock
+    private FinancingRequestDeliveryMapper financingRequestDeliveryMapper;
 
     @InjectMocks
     private CirceoProxy underTest;
@@ -168,5 +176,47 @@ class CirceoProxyTest {
         final CancelationResponse response = underTest.doCancel(resetRequest, partnerConfiguration);
 
         assertEquals(CancelationRequestState.DONE, response.getCancelationRequestState());
+    }
+
+
+    @Nested
+    class doCapture {
+
+        @Test
+        void shouldReturnDeliveryUpdateResponse() throws HttpErrorException, IOException {
+            final CaptureRequest captureRequest = MockUtils.aPaylineCaptureRequest(1000);
+            final DeliveryUpdateRequestToCapture deliveryUpdateRequest = MockUtils.aDeliveryRequestToCapture();
+            final DeliveryUpdateResponse deliveryUpdateResponse = MockUtils.aDeliveryUpdateResponse();
+            //Mock
+            doReturn("{}").when(objectMapper).writeValueAsString(deliveryUpdateRequest);
+            doReturn(deliveryUpdateRequest).when(financingRequestDeliveryMapper).map(captureRequest);
+            doReturn(deliveryUpdateResponse).when(circeoHttpClient).execute(httpPostArgumentCaptor.capture(), eq(DeliveryUpdateResponse.class));
+            //Test
+            final DeliveryUpdateResponse response = underTest.doCapture(captureRequest);
+
+            verify(circeoHttpClient).init(eq(captureRequest.getPartnerConfiguration()));
+            assertEquals(deliveryUpdateResponse, response);
+
+            final HttpPost httpPost = httpPostArgumentCaptor.getValue();
+            assertNotNull(httpPost);
+            assertEquals("https://recette.theloanfactory.carrefour-banque.fr/integration/service/financingRequests/C0000005/deliveries",
+                    httpPost.getURI().toString());
+            assertEquals(ContentType.APPLICATION_JSON.toString(), httpPost.getEntity().getContentType().getValue());
+            assertEquals("{}", PluginUtils.inputStreamToString(httpPost.getEntity().getContent()));
+        }
+
+        @Test
+        void shouldHandleJsonProcessingException() throws JsonProcessingException {
+            final CaptureRequest captureRequest = MockUtils.aPaylineCaptureRequest(1000);
+            final DeliveryUpdateRequestToCapture deliveryUpdateRequest = MockUtils.aDeliveryRequestToCapture();
+            doReturn(deliveryUpdateRequest).when(financingRequestDeliveryMapper).map(captureRequest);
+            doThrow(JsonProcessingException.class).when(objectMapper).writeValueAsString(deliveryUpdateRequest);
+
+            final PluginException pluginException = assertThrows(PluginException.class,
+                    () -> underTest.doCapture(captureRequest));
+
+            assertEquals("Unable to convert DeliveryUpdateRequest to json", pluginException.getMessage());
+            assertEquals(FailureCause.INTERNAL_ERROR, pluginException.getFailureCause());
+        }
     }
 }
