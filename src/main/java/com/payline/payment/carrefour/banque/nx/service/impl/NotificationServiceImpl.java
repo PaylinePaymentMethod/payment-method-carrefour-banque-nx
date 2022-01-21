@@ -32,7 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
             financingRequestStatus = objectMapper.readValue(notificationContent, FinancingRequestStatus.class);
             final State state = financingRequestStatus.getState();
             final String financingId = financingRequestStatus.getFinancingId();
-            if (State.STARTED.equals(state)) {
+            if (State.STARTED.equals(state) || State.INITIATED.equals(state)) {
                 // Dans le cas où circeo envoie une notif au moment de la redirection, on ne cherche pas à créer de transaction (c'est trop tôt)
                 log.info("Notification with status : {} ignored for financingId : {}", state, financingId);
                 notificationResponse = IgnoreNotificationResponse.IgnoreNotificationResponseBuilder.aIgnoreNotificationResponseBuilder().build();
