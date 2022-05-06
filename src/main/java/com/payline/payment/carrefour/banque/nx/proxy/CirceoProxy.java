@@ -17,6 +17,7 @@ import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.pmapi.bean.capture.request.CaptureRequest;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
 import lombok.extern.log4j.Log4j2;
 import org.apache.http.HttpEntity;
@@ -28,6 +29,7 @@ import org.apache.http.entity.StringEntity;
 @Log4j2
 public class CirceoProxy {
 
+
     private static class Holder {
         private static final CirceoProxy INSTANCE = new CirceoProxy();
     }
@@ -38,6 +40,7 @@ public class CirceoProxy {
     CirceoProxy() {
     }
 
+    private static final String ERROR_UNABLE_CONVERT_FINANCIAL_REQ = "Unable to convert FinancingRequest to json";
     public static final String FINANCING_REQUESTS_URL_FRAGMENT = "/financingRequests";
     public static final String CANCELATION_URL = "/cancelations";
     public static final String CAPTURE_DELIVERIES_URL = "/deliveries";
@@ -63,7 +66,7 @@ public class CirceoProxy {
             financingRequestJson = objectMapper.writeValueAsString(financingRequest);
         } catch (final JsonProcessingException e) {
             log.error(e);
-            throw new PluginException("Unable to convert FinancingRequest to json", FailureCause.INTERNAL_ERROR);
+            throw new PluginException(ERROR_UNABLE_CONVERT_FINANCIAL_REQ, FailureCause.INTERNAL_ERROR);
         }
         final HttpEntity httpEntity = new StringEntity(financingRequestJson, ContentType.APPLICATION_JSON);
 
@@ -82,14 +85,18 @@ public class CirceoProxy {
      * @throws HttpErrorException en cas d'erreur 4XX (mauvais paramètres de requête)
      */
     public CancelationResponse doCancel(final ResetRequest resetRequest, final PartnerConfiguration partnerConfiguration) throws HttpErrorException {
-        final String financingRequestJson;
         final FinancingRequestToCancel financingRequest = financingRequestCancelationMapper.map(resetRequest);
         final String financingId = resetRequest.getPartnerTransactionId();
+        return callCancelPartner(partnerConfiguration, financingRequest, financingId);
+    }
+
+    private CancelationResponse callCancelPartner(final PartnerConfiguration partnerConfiguration, final FinancingRequestToCancel financingRequest, final String financingId) throws HttpErrorException {
+        final String financingRequestJson;
         try {
             financingRequestJson = objectMapper.writeValueAsString(financingRequest);
         } catch (final JsonProcessingException e) {
             log.error(e);
-            throw new PluginException("Unable to convert FinancingRequest to json", FailureCause.INTERNAL_ERROR);
+            throw new PluginException(ERROR_UNABLE_CONVERT_FINANCIAL_REQ, FailureCause.INTERNAL_ERROR);
         }
         final HttpEntity httpEntity = new StringEntity(financingRequestJson, ContentType.APPLICATION_JSON);
 
@@ -99,6 +106,19 @@ public class CirceoProxy {
 
         circeoHttpClient.init(partnerConfiguration);
         return circeoHttpClient.execute(httpPost, CancelationResponse.class);
+    }
+
+
+    /**
+     * Effectue une demande de remboursement du financement auprès de circeo
+     * @param partnerConfiguration les partnerConf contenant les infos nécessaires à l'appel à l'API circeo
+     * @return la réponse à la demande d'annulation financement
+     * @throws HttpErrorException en cas d'erreur 4XX (mauvais paramètres de requête)
+     */
+    public CancelationResponse doCancel(final RefundRequest refundRequest, final PartnerConfiguration partnerConfiguration) throws HttpErrorException {
+        final FinancingRequestToCancel financingRequest = financingRequestCancelationMapper.map(refundRequest);
+        final String financingId = refundRequest.getPartnerTransactionId();
+        return callCancelPartner(partnerConfiguration, financingRequest, financingId);
     }
 
     /**
@@ -121,8 +141,6 @@ public class CirceoProxy {
      * Methode permettant d'appeler le service de capture de circeo.
      * @param captureRequest
      *      La requête Payline de capture.
-     * @param partnerConfiguration
-     *      Les informations de configurations du partenaire.
      * @return
      *      La réponse de circeo pour la capture.
      * @throws HttpErrorException

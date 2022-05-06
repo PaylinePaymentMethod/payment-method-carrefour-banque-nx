@@ -21,7 +21,10 @@ import com.payline.pmapi.bean.reset.response.impl.ResetResponseSuccess;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -107,14 +110,5 @@ class CirceoPaymentBusinessTest {
             assertEquals(CancelationRequestState.FAILED.name(), ((CaptureResponseFailure) resetResponse).getErrorCode());
             assertEquals(FailureCause.PAYMENT_PARTNER_ERROR, ((CaptureResponseFailure) resetResponse).getFailureCause());
         }
-    }
-
-    @Test
-    void convertToResetRequestOK() {
-        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000);
-        ResetRequest resetRequest = underTest.convertToResetRequest(refundRequest);
-        assertEquals(resetRequest.getTotalResetedAmount(), refundRequest.getTotalRefundedAmount());
-        assertEquals(resetRequest.getAmount(), refundRequest.getAmount());
-        assertEquals(resetRequest.getPartnerConfiguration(), refundRequest.getPartnerConfiguration());
     }
 }

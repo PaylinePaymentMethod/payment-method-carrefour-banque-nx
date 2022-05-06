@@ -27,10 +27,9 @@ public class RefundServiceImpl implements RefundService {
     @Override
     public RefundResponse refundRequest(final RefundRequest refundRequest) {
         RefundResponse refundResponse;
-        final ResetRequest resetRequest = circeoPaymentBusiness.convertToResetRequest(refundRequest);
 
         try {
-            final CancelationResponse cancelationResponse = circeoProxy.doCancel(resetRequest, resetRequest.getPartnerConfiguration());
+            final CancelationResponse cancelationResponse = circeoProxy.doCancel(refundRequest, refundRequest.getPartnerConfiguration());
             refundResponse = circeoPaymentBusiness.handleRefundResponse(cancelationResponse);
         } catch (final HttpErrorException e) {
             log.error(e);

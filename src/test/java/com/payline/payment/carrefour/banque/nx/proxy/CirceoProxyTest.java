@@ -23,6 +23,7 @@ import com.payline.pmapi.bean.capture.request.CaptureRequest;
 import com.payline.pmapi.bean.common.FailureCause;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.reset.request.ResetRequest;
+import com.payline.pmapi.bean.refund.request.RefundRequest;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -103,7 +104,7 @@ class CirceoProxyTest {
     }
 
     @Nested
-    class doCancel {
+    class doCancelForResetRequest {
 
         @Test
         void shouldReturnFinancingRequestResponse() throws HttpErrorException, IOException {
@@ -143,6 +144,49 @@ class CirceoProxyTest {
             assertEquals(FailureCause.INTERNAL_ERROR, pluginException.getFailureCause());
         }
     }
+
+    @Nested
+    class doCancelForRefundRequest {
+
+        @Test
+        void shouldReturnFinancingRequestResponse() throws HttpErrorException, IOException {
+            final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000, 2000, 1000);
+            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
+            final PartnerConfiguration partnerConfiguration = MockUtils.aPartnerConfiguration();
+            final CancelationResponse cancelationResponse = MockUtils.aCancelationSucessResponse();
+            //Mock
+            doReturn("{}").when(objectMapper).writeValueAsString(financingRequest);
+            doReturn(financingRequest).when(financingRequestCancelationMapper).map(refundRequest);
+            doReturn(cancelationResponse).when(circeoHttpClient).execute(httpPostArgumentCaptor.capture(), eq(CancelationResponse.class));
+            //Test
+            final CancelationResponse response = underTest.doCancel(refundRequest, partnerConfiguration);
+
+            verify(circeoHttpClient).init(partnerConfiguration);
+            assertEquals(cancelationResponse, response);
+
+            final HttpPost httpPost = httpPostArgumentCaptor.getValue();
+            assertNotNull(httpPost);
+            assertEquals("https://recette.theloanfactory.carrefour-banque.fr/integration/service/financingRequests/financingId/cancelations",
+                    httpPost.getURI().toString());
+            assertEquals(ContentType.APPLICATION_JSON.toString(), httpPost.getEntity().getContentType().getValue());
+            assertEquals("{}", PluginUtils.inputStreamToString(httpPost.getEntity().getContent()));
+        }
+
+        @Test
+        void shouldHandleJsonProcessingException() throws JsonProcessingException {
+            final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000, 2000, 1000);
+            final FinancingRequestToCancel financingRequest = MockUtils.aFinancingRequestToCancel();
+            doReturn(financingRequest).when(financingRequestCancelationMapper).map(refundRequest);
+            doThrow(JsonProcessingException.class).when(objectMapper).writeValueAsString(financingRequest);
+
+            final PluginException pluginException = assertThrows(PluginException.class,
+                    () -> underTest.doCancel(refundRequest, MockUtils.aPartnerConfiguration()));
+
+            assertEquals("Unable to convert FinancingRequest to json", pluginException.getMessage());
+            assertEquals(FailureCause.INTERNAL_ERROR, pluginException.getFailureCause());
+        }
+    }
+
 
     @Test
     void shouldGetFinancingRequestStatus() throws HttpErrorException {
@@ -194,7 +238,7 @@ class CirceoProxyTest {
             //Test
             final DeliveryUpdateResponse response = underTest.doCapture(captureRequest);
 
-            verify(circeoHttpClient).init(eq(captureRequest.getPartnerConfiguration()));
+            verify(circeoHttpClient).init(captureRequest.getPartnerConfiguration());
             assertEquals(deliveryUpdateResponse, response);
 
             final HttpPost httpPost = httpPostArgumentCaptor.getValue();
