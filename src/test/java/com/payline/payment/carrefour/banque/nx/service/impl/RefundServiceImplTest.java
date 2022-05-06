@@ -24,8 +24,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
-
-public class RefundServiceImplTest {
+class RefundServiceImplTest {
     @Mock
     private CirceoProxy circeoProxy;
 
@@ -34,10 +33,10 @@ public class RefundServiceImplTest {
 
     @Test
     void refund_RequestTestOK() throws HttpErrorException {
-        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000);
+        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000, 2000, 1000);
         final CancelationResponse cancelationResponse = MockUtils.aCancelationSucessResponse();
         //Mock
-        doReturn(cancelationResponse).when(circeoProxy).doCancel(any(), any());
+        doReturn(cancelationResponse).when(circeoProxy).doCancel(any(RefundRequest.class), any());
         //Test
         final RefundResponse refundResponse = underTest.refundRequest(refundRequest);
 
@@ -49,10 +48,10 @@ public class RefundServiceImplTest {
 
     @Test
     void refund_RequestTestFailed() throws HttpErrorException {
-        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000);
+        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000, 2000, 1000);
         final CancelationResponse cancelationResponse = MockUtils.aCancelationFailureResponse();
         //Mock
-        doReturn(cancelationResponse).when(circeoProxy).doCancel(any(), any());
+        doReturn(cancelationResponse).when(circeoProxy).doCancel(any(RefundRequest.class), any());
         //Test
         final RefundResponse refundResponse = underTest.refundRequest(refundRequest);
 
@@ -64,10 +63,10 @@ public class RefundServiceImplTest {
 
     @Test
     void refund_RequestTestReceived() throws HttpErrorException {
-        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000);
+        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000, 2000, 1000);
         final CancelationResponse cancelationResponse = MockUtils.aCancelationReceivedFailureResponse();
         //Mock
-        doReturn(cancelationResponse).when(circeoProxy).doCancel(any(), any());
+        doReturn(cancelationResponse).when(circeoProxy).doCancel(any(RefundRequest.class), any());
         //Test
         final RefundResponse refundResponse = underTest.refundRequest(refundRequest);
 
@@ -79,10 +78,10 @@ public class RefundServiceImplTest {
 
     @Test
     void refund_RequestShouldThrowHttpErrorException() throws HttpErrorException {
-        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000);
+        final RefundRequest refundRequest = MockUtils.aPaylineRefundRequest(1000, 2000, 1000);
         final HttpErrorException exception = new HttpErrorException(null, "server error");
         //Mock
-        doThrow(exception).when(circeoProxy).doCancel(any(), any());
+        doThrow(exception).when(circeoProxy).doCancel(any(RefundRequest.class), any());
         //Test
         final RefundResponse refundResponse = underTest.refundRequest(refundRequest);
 

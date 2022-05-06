@@ -14,6 +14,7 @@ import com.payline.payment.carrefour.banque.nx.bean.response.FinancingRequestSta
 import com.payline.payment.carrefour.banque.nx.utils.Constants;
 import com.payline.payment.carrefour.banque.nx.utils.TestUtils;
 import com.payline.pmapi.bean.capture.request.CaptureRequest;
+import com.payline.pmapi.bean.common.Balance;
 import com.payline.pmapi.bean.common.Buyer;
 import com.payline.pmapi.bean.configuration.PartnerConfiguration;
 import com.payline.pmapi.bean.configuration.request.ContractParametersCheckRequest;
@@ -482,7 +483,11 @@ public class MockUtils {
                 .withPartnerConfiguration(aPartnerConfiguration())
                 .withPluginConfiguration(aPluginConfiguration())
                 .withSoftDescriptor("softDescriptor")
-                .withTransactionId("PAYLINE" + timestamp).build();
+                .withTransactionId("PAYLINE" + timestamp)
+                .withBalance(Balance.builder().totalResetedAmount(aPaylineAmount(0))
+                        .totalValidatedAmount(aPaylineAmount(2000))
+                        .totalRefundedAmount(aPaylineAmount(1000))
+                        .build()).build();
     }
 
     public static CaptureRequest aPaylineCaptureRequest(int amountToReset) {
@@ -497,11 +502,18 @@ public class MockUtils {
                 .withPartnerConfiguration(aPartnerConfiguration())
                 .withPluginConfiguration(aPluginConfiguration())
                 .withSoftDescriptor("softDescriptor")
-                .withTransactionId("PAYLINE" + timestamp).build();
+                .withTransactionId("PAYLINE" + timestamp)
+                .withBalance(Balance.builder().totalResetedAmount(aPaylineAmount(amountToReset))
+                        .totalValidatedAmount(aPaylineAmount(2000))
+                        .totalRefundedAmount(aPaylineAmount(1000))
+                        .build()).build();
     }
 
 
-    public static RefundRequest aPaylineRefundRequest(int amountToReset) {
+    public static RefundRequest aPaylineRefundRequest(int amountToReset, int amountTotalValidated, int amountTotalRefund) {
+
+        final Balance.BalanceBuilder balanceBuilder = Balance.builder().totalResetedAmount(aPaylineAmount(amountToReset))
+                .totalValidatedAmount(aPaylineAmount(amountTotalValidated));
 
         return RefundRequest.RefundRequestBuilder.aRefundRequest()
                 .withPartnerTransactionId("financingId")
@@ -514,7 +526,11 @@ public class MockUtils {
                 .withPartnerConfiguration(aPartnerConfiguration())
                 .withPluginConfiguration(aPluginConfiguration())
                 .withSoftDescriptor("softDescriptor")
-                .withTransactionId("PAYLINE" + timestamp).build();
+                .withTransactionId("PAYLINE" + timestamp)
+                .withBalance(Balance.builder().totalResetedAmount(aPaylineAmount(amountToReset))
+                        .totalValidatedAmount(aPaylineAmount(amountTotalValidated))
+                        .totalRefundedAmount(aPaylineAmount(amountTotalRefund))
+                        .build()).build();
     }
 
     public static com.payline.pmapi.bean.common.Amount aPaylineAmount(int amount) {
